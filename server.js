@@ -6,7 +6,7 @@ const app = express();
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, '/public/dist')))
 
-const port = 8000
+const port = process.env.PORT || 8000
 
 var routes_setter = require('./server/config/routes.js')
 
