@@ -18,6 +18,7 @@ export class AppComponent {
         this._connection.getSockets().subscribe(message => {
         this.message = message
         console.log("we did it!",this.message)
+        
     })
       }
 

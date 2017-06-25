@@ -6,10 +6,21 @@ import { HttpModule } from "@angular/http";
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from "app/app-routing.module";
 import { ConnectionService } from "app/connection.service";
+import { GameboardComponent } from './gameboard/gameboard.component';
+import { BuzzerComponent } from './buzzer/buzzer.component';
+import { LandingComponent } from './landing/landing.component';
+import { CapitalizePipe } from './capitalize.pipe';
+import {CookieService} from 'angular2-cookie/services/cookies.service';
+import { QuestionComponent } from './question/question.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    GameboardComponent,
+    BuzzerComponent,
+    LandingComponent,
+    CapitalizePipe,
+    QuestionComponent
   ],
   imports: [
     BrowserModule,
@@ -17,7 +28,7 @@ import { ConnectionService } from "app/connection.service";
     FormsModule,
     AppRoutingModule
   ],
-  providers: [ConnectionService],
+  providers: [ConnectionService,CookieService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

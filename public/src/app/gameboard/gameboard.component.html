@@ -1,0 +1,15 @@
+<table class="board" *ngIf="!text_visible">
+  <thead>
+      <tr>
+          <th *ngFor="let category of game"><span>{{category.name | capitalize}}</span>&nbsp;</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let i of arr">
+            <td *ngFor="let category of game" (click)="show(category.questions[i])"><span *ngIf="!category.questions[i].asked">{{(i+1)*100}}</span></td>
+        </tr>
+    </tbody>
+</table>
+<div *ngIf="text_visible" style="vertical-align: middle" (click)="question_clicked()">
+  <h1 class="question">{{text | capitalize}}</h1>
+</div>

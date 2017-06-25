@@ -1,0 +1,15 @@
+h1 {
+    font-family: Jeopardy;
+    color: white;
+    font-size: 15vw;
+}
+
+.question {
+    font-family: Korinna;
+    color: white;
+}
+
+.option {
+    font-size: 5vw;
+    text-decoration: none;
+}

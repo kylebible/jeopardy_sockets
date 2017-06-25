@@ -1,5 +1,19 @@
 webpackJsonp([2],{
 
+/***/ "../../../../../src/assets/Korinna.ttf":
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "Korinna.e2f3fafa39e66f22f068.ttf";
+
+/***/ }),
+
+/***/ "../../../../../src/assets/gyparody.heavy.ttf":
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "gyparody.heavy.7f467deaf95e9c4b24c7.ttf";
+
+/***/ }),
+
 /***/ "../../../../../src/styles.css":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -35,7 +49,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "/* You can add global styles to this file, and also import other style files */\n", ""]);
+exports.push([module.i, "/* You can add global styles to this file, and also import other style files */\n@font-face {\n    font-family: Korinna;\n    src: url(" + __webpack_require__("../../../../../src/assets/Korinna.ttf") + ");\n    font-weight: bold;\n}\n\n@font-face {\n    font-family: Jeopardy;\n    src: url(" + __webpack_require__("../../../../../src/assets/gyparody.heavy.ttf") + ");\n    font-weight: bold;\n}\n\n* {\n    font-family: Korinna;\n}\n\nbody {\n    background-color: #070CEC\n}", ""]);
 
 // exports
 

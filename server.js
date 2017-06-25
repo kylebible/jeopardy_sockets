@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path'); 
 const app = express();
+const game = require('./game.json')
 
 app.use(bodyParser.json())
 app.use(express.static(path.join(__dirname, '/public/dist')))

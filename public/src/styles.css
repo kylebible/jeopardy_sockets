@@ -1,1 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
+@font-face {
+    font-family: Korinna;
+    src: url(./assets/Korinna.ttf);
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: Jeopardy;
+    src: url(./assets/gyparody.heavy.ttf);
+    font-weight: bold;
+}
+
+* {
+    font-family: Korinna;
+}
+
+body {
+    background-color: #070CEC
+}
