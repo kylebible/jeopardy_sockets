@@ -293,7 +293,7 @@ CapitalizePipe = __decorate([
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+/* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Observable__ = __webpack_require__("../../../../rxjs/Observable.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_Observable__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs__ = __webpack_require__("../../../../rxjs/Rx.js");
@@ -326,7 +326,8 @@ var ConnectionService = (function () {
         this._http = _http;
         this._cookie = _cookie;
         this._router = _router;
-        this.url = 'http://localhost:8000';
+        this.port = process.env.PORT || 8000;
+        this.url = 'http://localhost:' + this.port;
         //private url = 'https://jeopardysockets.herokuapp.com';
         this.observedGame = new __WEBPACK_IMPORTED_MODULE_2_rxjs__["BehaviorSubject"](null);
         //connect to socket on server
@@ -343,7 +344,7 @@ var ConnectionService = (function () {
             _this.socket.on('game_update', function (data) {
                 console.log("game received", data);
                 localStorage.setItem('game', JSON.stringify(data));
-                this._router;
+                this._router.navigate(['/gameboard']);
             });
             return function () {
                 _this.socket.disconnect();
@@ -388,6 +389,7 @@ ConnectionService = __decorate([
 
 var _a, _b, _c;
 //# sourceMappingURL=connection.service.js.map
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__("../../../../process/browser.js")))
 
 /***/ }),
 

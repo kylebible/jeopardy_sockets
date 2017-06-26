@@ -5,6 +5,7 @@ import * as io from 'socket.io-client';
 import { Http } from "@angular/http";
 import { CookieService } from "angular2-cookie/services/cookies.service";
 import { Router } from "@angular/router";
+declare var process:any
 
 @Injectable()
 export class ConnectionService {
