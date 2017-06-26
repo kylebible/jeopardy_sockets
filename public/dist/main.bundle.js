@@ -321,8 +321,8 @@ var ConnectionService = (function () {
     function ConnectionService(_http, _cookie) {
         this._http = _http;
         this._cookie = _cookie;
-        this.url = 'http://localhost:8000';
-        //private url = 'https://jeopardysockets.herokuapp.com';
+        //private url = 'http://localhost:8000'; 
+        this.url = 'https://jeopardysockets.herokuapp.com';
         this.observedGame = new __WEBPACK_IMPORTED_MODULE_2_rxjs__["BehaviorSubject"](null);
         //connect to socket on server
         this.socket = __WEBPACK_IMPORTED_MODULE_3_socket_io_client__(this.url);

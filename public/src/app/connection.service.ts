@@ -7,8 +7,8 @@ import { CookieService } from "angular2-cookie/services/cookies.service";
 
 @Injectable()
 export class ConnectionService {
-  private url = 'http://localhost:8000'; 
-  //private url = 'https://jeopardysockets.herokuapp.com';
+  //private url = 'http://localhost:8000'; 
+  private url = 'https://jeopardysockets.herokuapp.com';
   observedGame = new BehaviorSubject(null)
 
   //connect to socket on server
