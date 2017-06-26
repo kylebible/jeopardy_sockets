@@ -58,4 +58,6 @@ div a {
     vertical-align: middle;
     text-align: center;
     padding: 2vw;
+    text-shadow: 1px 3px 5px black;
+    font-weight: bold;
 }

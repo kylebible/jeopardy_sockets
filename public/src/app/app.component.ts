@@ -11,7 +11,7 @@ import { ConnectionService } from "app/connection.service";
 export class AppComponent {
   private url = 'https://jeopardysockets.herokuapp.com';  
   private socket;
-  private message;
+  private game;
 
       constructor (private _connection: ConnectionService) {
         this.socket = io.connect()
@@ -22,9 +22,7 @@ export class AppComponent {
     })
       }
 
-  buttonPush() {
-    this.socket.emit('button_press', {data: "this is some data"})
-  }
+    
 
   
 }

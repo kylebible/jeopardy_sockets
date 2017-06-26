@@ -398,7 +398,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "*{\n    font-family: Arial, Helvetica, sans-serif\n}\n\ntable.board {\n  border-collapse: separate;\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border-spacing: 2px;\n  border-color: gray;\n}\n  \ntr {\ndisplay: table-row;\nborder-color: inherit;\n}\n\nth, td {\n    padding: 10px;\n    background-color: blue;\n    border: 1px outset blue;\n    color: rgb(255, 194, 102);\n    padding: 1px;\n    vertical-align: middle;\n}\n\nth {\n    width: 100px;\n    height: 120px;\n    font-size: medium;\n    text-align: center\n}\n\ntd {\n    font-size: 2.7em;\n    font-weight: bold;\n    vertical-align: middle;\n    height: 120px;\n    width: 100px;\n    border-radius: 10px\n}\n\ndiv a {\n    color: #FF6;\n    text-decoration: none;\n    outline: 0; \n}\n\n.question {\n    position: absolute;\n    top: 25%;\n    left: 0;\n    right: 0;\n    font-family: Korinna;\n    color: white;\n    font-size: 7vw;\n    vertical-align: middle;\n    text-align: center;\n    padding: 2vw;\n}", ""]);
+exports.push([module.i, "*{\n    font-family: Arial, Helvetica, sans-serif\n}\n\ntable.board {\n  border-collapse: separate;\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border-spacing: 2px;\n  border-color: gray;\n}\n  \ntr {\ndisplay: table-row;\nborder-color: inherit;\n}\n\nth, td {\n    padding: 10px;\n    background-color: blue;\n    border: 1px outset blue;\n    color: rgb(255, 194, 102);\n    padding: 1px;\n    vertical-align: middle;\n}\n\nth {\n    width: 100px;\n    height: 120px;\n    font-size: medium;\n    text-align: center\n}\n\ntd {\n    font-size: 2.7em;\n    font-weight: bold;\n    vertical-align: middle;\n    height: 120px;\n    width: 100px;\n    border-radius: 10px\n}\n\ndiv a {\n    color: #FF6;\n    text-decoration: none;\n    outline: 0; \n}\n\n.question {\n    position: absolute;\n    top: 25%;\n    left: 0;\n    right: 0;\n    font-family: Korinna;\n    color: white;\n    font-size: 7vw;\n    vertical-align: middle;\n    text-align: center;\n    padding: 2vw;\n    text-shadow: 1px 3px 5px black;\n    font-weight: bold;\n}", ""]);
 
 // exports
 
@@ -411,7 +411,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/gameboard/gameboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<table class=\"board\" *ngIf=\"!text_visible\">\n  <thead>\n      <tr>\n          <th *ngFor=\"let category of game\"><span>{{category.name | capitalize}}</span>&nbsp;</th>\n      </tr>\n    </thead>\n    <tbody>\n        <tr *ngFor=\"let i of arr\">\n            <td *ngFor=\"let category of game\" (click)=\"show(category.questions[i])\"><span *ngIf=\"!category.questions[i].asked\">{{(i+1)*100}}</span></td>\n        </tr>\n    </tbody>\n</table>\n<div *ngIf=\"text_visible\" style=\"vertical-align: middle\" (click)=\"question_clicked()\">\n  <h1 class=\"question\">{{text | capitalize}}</h1>\n</div>\n"
+module.exports = "<table class=\"board\" *ngIf=\"!text_visible\">\n  <thead>\n      <tr>\n          <th *ngFor=\"let category of game\"><span>{{category.name | capitalize}}</span>&nbsp;</th>\n      </tr>\n    </thead>\n    <tbody>\n        <tr *ngFor=\"let i of arr\">\n            <td *ngFor=\"let category of game\" (click)=\"show(category.questions[i])\"><span *ngIf=\"!category.questions[i].asked\">{{(i+1)*100}}</span></td>\n        </tr>\n    </tbody>\n</table>\n<div *ngIf=\"text_visible\" style=\"vertical-align: middle\" (click)=\"question_clicked()\">\n  <h1 class=\"question\">{{text | uppercase}}</h1>\n</div>\n"
 
 /***/ }),
 
@@ -509,7 +509,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/landing/landing.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container text-center\">\n  <h1>Jeopardy!</h1>\n  <a [routerLink]=\"['/gameboard']\" class=\"question option\" (click)=\"getGame()\">Start a new game</a><br>\n  <a href=\"#\" class=\"question option\">Join a game</a>\n  <a href=\"#\" class=\"question option\">Be Alex Trebek</a>\n</div>"
+module.exports = "<div class=\"container text-center\">\n  <h1>Jeopardy!</h1>\n  <a [routerLink]=\"['/gameboard']\" class=\"question option\" (click)=\"getGame()\">Start a new game</a><br>\n  <a href=\"#\" class=\"question option\">Join a game</a><br>\n  <a href=\"#\" class=\"question option\">Be Alex Trebek</a>\n</div>"
 
 /***/ }),
 

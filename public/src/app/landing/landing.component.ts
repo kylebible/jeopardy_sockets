@@ -18,4 +18,8 @@ export class LandingComponent implements OnInit {
     this._connection.startNewGame()
   }
 
+  joinGame() {
+    this._connection.joinGame()
+  }
+
 }

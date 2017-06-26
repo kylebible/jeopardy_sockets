@@ -7,9 +7,12 @@ import { CookieService } from "angular2-cookie/services/cookies.service";
 
 @Injectable()
 export class ConnectionService {
-  private socket;
-  private url = 'http://jeopardysockets.herokuapp.com';
+  //private url = 'http://http://localhost:8000'; 
+  private url = 'https://jeopardysockets.herokuapp.com';
   observedGame = new BehaviorSubject(null)
+
+  //connect to socket on server
+  socket = io(this.url) 
 
   constructor(private _http: Http, private _cookie:CookieService) { }
 
@@ -18,38 +21,47 @@ export class ConnectionService {
   }
 
   getSockets() {
+    //make new observable for changes in sockets
     let observable = new Observable(observer => {
-      this.socket = io(this.url)
+      
+
+      //socket functions go here
       this.socket.on('server_response', function (data){
       observer.next(data)
-  });
+      });
+      
       return () => {
         this.socket.disconnect();
       }
+
     })
     return observable;
   }
 
-  categories(game) {
-  var titleArr =[]
-  var arr=[]
-  var dict = {}
-  for (var i of game) {
-    if (!dict[i.category.title]) {
-      titleArr.push(i.category.title)
-      dict[i.category.title] = []
-      dict[i.category.title].push(i)
-    }
-    else {
-      dict[i.category.title].push(i)
-    }
+  joinGame() {
+    this.socket.emit('player_joined', {username: "kbible"})
   }
-  for (var j of titleArr) {
-    arr.push({name: j,questions:dict[j]})
-  }
-  console.log(arr)
-  return arr
-}
+
+//   categories(game) {
+//   var titleArr =[]
+//   var arr=[]
+//   var dict = {}
+//   for (var i of game) {
+//     if (!dict[i.category.title]) {
+//       titleArr.push(i.category.title)
+//       dict[i.category.title] = []
+//       dict[i.category.title].push(i)
+//     }
+//     else {
+//       dict[i.category.title].push(i)
+//     }
+//   }
+//   for (var j of titleArr) {
+//     arr.push({name: j,questions:dict[j]})
+//   }
+//   console.log(arr)
+//   return arr
+// }
 
 
 //gets a random game, takes the airdate, and grabs all categories and questions from that airdate
