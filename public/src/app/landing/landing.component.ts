@@ -19,6 +19,7 @@ export class LandingComponent implements OnInit {
   }
 
   joinGame() {
+    console.log('join game')
     this._connection.joinGame()
   }
 

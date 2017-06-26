@@ -7,8 +7,8 @@ import { CookieService } from "angular2-cookie/services/cookies.service";
 
 @Injectable()
 export class ConnectionService {
-  //private url = 'http://http://localhost:8000'; 
-  private url = 'https://jeopardysockets.herokuapp.com';
+  private url = 'http://localhost:8000'; 
+  //private url = 'https://jeopardysockets.herokuapp.com';
   observedGame = new BehaviorSubject(null)
 
   //connect to socket on server
@@ -39,29 +39,29 @@ export class ConnectionService {
   }
 
   joinGame() {
-    this.socket.emit('player_joined', {username: "kbible"})
+    this.socket.emit('player_joined', {userName: "kbible"})
   }
 
-//   categories(game) {
-//   var titleArr =[]
-//   var arr=[]
-//   var dict = {}
-//   for (var i of game) {
-//     if (!dict[i.category.title]) {
-//       titleArr.push(i.category.title)
-//       dict[i.category.title] = []
-//       dict[i.category.title].push(i)
-//     }
-//     else {
-//       dict[i.category.title].push(i)
-//     }
-//   }
-//   for (var j of titleArr) {
-//     arr.push({name: j,questions:dict[j]})
-//   }
-//   console.log(arr)
-//   return arr
-// }
+  categories(game) {
+  var titleArr =[]
+  var arr=[]
+  var dict = {}
+  for (var i of game) {
+    if (!dict[i.category.title]) {
+      titleArr.push(i.category.title)
+      dict[i.category.title] = []
+      dict[i.category.title].push(i)
+    }
+    else {
+      dict[i.category.title].push(i)
+    }
+  }
+  for (var j of titleArr) {
+    arr.push({name: j,questions:dict[j]})
+  }
+  console.log(arr)
+  return arr
+}
 
 
 //gets a random game, takes the airdate, and grabs all categories and questions from that airdate

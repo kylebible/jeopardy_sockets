@@ -102,16 +102,12 @@ var AppComponent = (function () {
     function AppComponent(_connection) {
         var _this = this;
         this._connection = _connection;
-        this.url = 'https://jeopardysockets.herokuapp.com';
         this.socket = __WEBPACK_IMPORTED_MODULE_1_socket_io_client__["connect"]();
         this._connection.getSockets().subscribe(function (message) {
             _this.message = message;
             console.log("we did it!", _this.message);
         });
     }
-    AppComponent.prototype.buttonPush = function () {
-        this.socket.emit('button_press', { data: "this is some data" });
-    };
     return AppComponent;
 }());
 AppComponent = __decorate([
@@ -325,16 +321,20 @@ var ConnectionService = (function () {
     function ConnectionService(_http, _cookie) {
         this._http = _http;
         this._cookie = _cookie;
-        this.url = 'http://jeopardysockets.herokuapp.com';
+        this.url = 'http://localhost:8000';
+        //private url = 'https://jeopardysockets.herokuapp.com';
         this.observedGame = new __WEBPACK_IMPORTED_MODULE_2_rxjs__["BehaviorSubject"](null);
+        //connect to socket on server
+        this.socket = __WEBPACK_IMPORTED_MODULE_3_socket_io_client__(this.url);
     }
     ConnectionService.prototype.updategame = function (data) {
         this.observedGame.next(data);
     };
     ConnectionService.prototype.getSockets = function () {
         var _this = this;
+        //make new observable for changes in sockets
         var observable = new __WEBPACK_IMPORTED_MODULE_1_rxjs_Observable__["Observable"](function (observer) {
-            _this.socket = __WEBPACK_IMPORTED_MODULE_3_socket_io_client__(_this.url);
+            //socket functions go here
             _this.socket.on('server_response', function (data) {
                 observer.next(data);
             });
@@ -343,6 +343,9 @@ var ConnectionService = (function () {
             };
         });
         return observable;
+    };
+    ConnectionService.prototype.joinGame = function () {
+        this.socket.emit('player_joined', { userName: "kbible" });
     };
     ConnectionService.prototype.categories = function (game) {
         var titleArr = [];
@@ -509,7 +512,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/landing/landing.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container text-center\">\n  <h1>Jeopardy!</h1>\n  <a [routerLink]=\"['/gameboard']\" class=\"question option\" (click)=\"getGame()\">Start a new game</a><br>\n  <a href=\"#\" class=\"question option\">Join a game</a><br>\n  <a href=\"#\" class=\"question option\">Be Alex Trebek</a>\n</div>"
+module.exports = "<div class=\"container text-center\">\n  <h1>Jeopardy!</h1>\n  <a [routerLink]=\"['/gameboard']\" class=\"question option\" (click)=\"getGame()\">Start a new game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" (click)=\"joinGame()\">Join a game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\">Be Alex Trebek</a>\n</div>"
 
 /***/ }),
 
@@ -540,6 +543,10 @@ var LandingComponent = (function () {
     LandingComponent.prototype.getGame = function () {
         console.log("get game");
         this._connection.startNewGame();
+    };
+    LandingComponent.prototype.joinGame = function () {
+        console.log('join game');
+        this._connection.joinGame();
     };
     return LandingComponent;
 }());

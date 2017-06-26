@@ -9,9 +9,9 @@ import { ConnectionService } from "app/connection.service";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  private url = 'https://jeopardysockets.herokuapp.com';  
   private socket;
   private game;
+  private message;
 
       constructor (private _connection: ConnectionService) {
         this.socket = io.connect()

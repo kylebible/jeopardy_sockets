@@ -25,6 +25,7 @@ io.sockets.on('connection', function (socket) {
   console.log(socket.id);
 
   socket.on('player_joined', function(player) {
+    console.log('player_joined')
     players[socket.id] = player;
     players[socket.id].id = socket.id
     console.log("Player " + player.userName + " with id: " + socket.id + " has joined.");
