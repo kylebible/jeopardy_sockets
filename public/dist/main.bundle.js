@@ -97,16 +97,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 var AppComponent = (function () {
     function AppComponent(_connection) {
-        var _this = this;
+        // console.log('at app')
+        // this._connection.getSockets().subscribe(message => {
+        // this.message = message
+        // console.log("we did it!",this.message)
         this._connection = _connection;
-        console.log('at app');
-        this._connection.getSockets().subscribe(function (message) {
-            _this.message = message;
-            console.log("we did it!", _this.message);
-        });
+        // })
     }
     AppComponent.prototype.ngOnDestroy = function () {
-        this.socket.disconnect();
+        // this.socket.disconnect()
     };
     AppComponent.prototype.ngOnInit = function () {
     };
@@ -294,16 +293,14 @@ CapitalizePipe = __decorate([
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Observable__ = __webpack_require__("../../../../rxjs/Observable.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs_Observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs_Observable__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs__ = __webpack_require__("../../../../rxjs/Rx.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_socket_io_client__ = __webpack_require__("../../../../socket.io-client/lib/index.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_socket_io_client___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_socket_io_client__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__angular_http__ = __webpack_require__("../../../http/@angular/http.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__ = __webpack_require__("../../../../angular2-cookie/services/cookies.service.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__angular_router__ = __webpack_require__("../../../router/@angular/router.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs__ = __webpack_require__("../../../../rxjs/Rx.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_rxjs___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_rxjs__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_socket_io_client__ = __webpack_require__("../../../../socket.io-client/lib/index.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_socket_io_client___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_socket_io_client__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_http__ = __webpack_require__("../../../http/@angular/http.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_angular2_cookie_services_cookies_service__ = __webpack_require__("../../../../angular2-cookie/services/cookies.service.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_angular2_cookie_services_cookies_service___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_angular2_cookie_services_cookies_service__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__angular_router__ = __webpack_require__("../../../router/@angular/router.es5.js");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ConnectionService; });
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -320,8 +317,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-
 var ConnectionService = (function () {
+    //connect to socket on server
     function ConnectionService(_http, _cookie, _router) {
         this._http = _http;
         this._cookie = _cookie;
@@ -329,31 +326,36 @@ var ConnectionService = (function () {
         this.port = process.env.PORT || 8000;
         this.url = 'http://localhost:' + this.port;
         //private url = 'https://jeopardysockets.herokuapp.com';
-        this.observedGame = new __WEBPACK_IMPORTED_MODULE_2_rxjs__["BehaviorSubject"](null);
-        //connect to socket on server
-        this.socket = __WEBPACK_IMPORTED_MODULE_3_socket_io_client__(this.url);
+        this.observedGame = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
+        this.socket = __WEBPACK_IMPORTED_MODULE_2_socket_io_client__(this.url);
+        this.socket.on('game_update', function (data) {
+            console.log("game received", data);
+            localStorage.setItem('game', JSON.stringify(data));
+            _router.navigate(['/gameboard']);
+        });
     }
     ConnectionService.prototype.updategame = function (data) {
         this.observedGame.next(data);
     };
-    ConnectionService.prototype.getSockets = function () {
-        var _this = this;
-        //make new observable for changes in sockets
-        var observable = new __WEBPACK_IMPORTED_MODULE_1_rxjs_Observable__["Observable"](function (observer) {
-            //socket functions go here
-            _this.socket.on('game_update', function (data) {
-                console.log("game received", data);
-                localStorage.setItem('game', JSON.stringify(data));
-                this._router.navigate(['/gameboard']);
-            });
-            return function () {
-                _this.socket.disconnect();
-            };
-        });
-        return observable;
-    };
+    // getSockets() {
+    //   //make new observable for changes in sockets
+    //   let observable = new Observable(observer => {
+    //     //socket functions go here
+    //     this.socket.on('game_update', function (data){
+    //       console.log("game received",data)
+    //       localStorage.setItem('game',JSON.stringify(data))
+    //     });
+    //     return () => {
+    //       this.socket.disconnect();
+    //     }
+    //   })
+    //   return observable;
+    // }
     ConnectionService.prototype.joinGame = function () {
         this.socket.emit('player_joined', { userName: "kbible" });
+    };
+    ConnectionService.prototype.reroute = function () {
+        this._router.navigate(["/gameboard"]);
     };
     //   categories(game) {
     //   var titleArr =[]
@@ -384,7 +386,7 @@ var ConnectionService = (function () {
 }());
 ConnectionService = __decorate([
     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_4__angular_http__["b" /* Http */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_4__angular_http__["b" /* Http */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__["CookieService"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__["CookieService"]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_6__angular_router__["a" /* Router */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_6__angular_router__["a" /* Router */]) === "function" && _c || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_3__angular_http__["b" /* Http */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_3__angular_http__["b" /* Http */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_4_angular2_cookie_services_cookies_service__["CookieService"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_4_angular2_cookie_services_cookies_service__["CookieService"]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_5__angular_router__["a" /* Router */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_5__angular_router__["a" /* Router */]) === "function" && _c || Object])
 ], ConnectionService);
 
 var _a, _b, _c;

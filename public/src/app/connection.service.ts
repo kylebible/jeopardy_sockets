@@ -13,38 +13,49 @@ export class ConnectionService {
   private url = 'http://localhost:' + this.port; 
   //private url = 'https://jeopardysockets.herokuapp.com';
   observedGame = new BehaviorSubject(null)
-
+  socket;
   //connect to socket on server
-  socket = io(this.url) 
+   
 
-  constructor(private _http: Http, private _cookie:CookieService, private _router:Router) { }
+  
+
+  constructor(private _http: Http, private _cookie:CookieService, private _router:Router) {
+      this.socket = io(this.url)
+      this.socket.on('game_update', function (data){
+        console.log("game received",data)
+        localStorage.setItem('game',JSON.stringify(data))
+        _router.navigate(['/gameboard'])
+      });
+
+   }
 
   updategame(data) {
     this.observedGame.next(data)
   }
 
-  getSockets() {
-    //make new observable for changes in sockets
-    let observable = new Observable(observer => {
+  // getSockets() {
+  //   //make new observable for changes in sockets
+  //   let observable = new Observable(observer => {
+  //     //socket functions go here
+  //     this.socket.on('game_update', function (data){
+  //       console.log("game received",data)
+  //       localStorage.setItem('game',JSON.stringify(data))
+  //     });
       
+  //     return () => {
+  //       this.socket.disconnect();
+  //     }
 
-      //socket functions go here
-      this.socket.on('game_update', function (data){
-        console.log("game received",data)
-        localStorage.setItem('game',JSON.stringify(data))
-        this._router.navigate(['/gameboard'])
-      });
-      
-      return () => {
-        this.socket.disconnect();
-      }
-
-    })
-    return observable;
-  }
+  //   })
+  //   return observable;
+  // }
 
   joinGame() {
     this.socket.emit('player_joined', {userName: "kbible"})
+  }
+
+  reroute() {
+    this._router.navigate(["/gameboard"])
   }
 
 //   categories(game) {

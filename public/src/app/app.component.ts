@@ -14,16 +14,16 @@ export class AppComponent implements OnInit, OnDestroy {
   private message;
 
       constructor (private _connection: ConnectionService) {
-        console.log('at app')
-        this._connection.getSockets().subscribe(message => {
-        this.message = message
-        console.log("we did it!",this.message)
+        // console.log('at app')
+        // this._connection.getSockets().subscribe(message => {
+        // this.message = message
+        // console.log("we did it!",this.message)
         
-    })
+    // })
       }
 
     ngOnDestroy() {
-      this.socket.disconnect()
+      // this.socket.disconnect()
     }
 
     ngOnInit() {
