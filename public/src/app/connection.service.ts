@@ -9,9 +9,9 @@ declare var process:any
 
 @Injectable()
 export class ConnectionService {
-  port = process.env.PORT || 8000
-  private url = 'http://localhost:' + this.port; 
-  //private url = 'https://jeopardysockets.herokuapp.com';
+  port = 8000
+  // private url = 'http://localhost:' + this.port; 
+  private url = 'https://jeopardysockets.herokuapp.com';
   observedGame = new BehaviorSubject(null)
   socket;
   //connect to socket on server
