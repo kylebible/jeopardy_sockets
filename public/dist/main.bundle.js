@@ -43,8 +43,8 @@ var AppRoutingModule = (function () {
 }());
 AppRoutingModule = __decorate([
     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__angular_core__["NgModule"])({
-        imports: [__WEBPACK_IMPORTED_MODULE_1__angular_router__["a" /* RouterModule */].forRoot(routes)],
-        exports: [__WEBPACK_IMPORTED_MODULE_1__angular_router__["a" /* RouterModule */]]
+        imports: [__WEBPACK_IMPORTED_MODULE_1__angular_router__["b" /* RouterModule */].forRoot(routes)],
+        exports: [__WEBPACK_IMPORTED_MODULE_1__angular_router__["b" /* RouterModule */]]
     })
 ], AppRoutingModule);
 
@@ -82,9 +82,7 @@ module.exports = "<router-outlet></router-outlet>"
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_socket_io_client__ = __webpack_require__("../../../../socket.io-client/lib/index.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_socket_io_client___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_socket_io_client__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_app_connection_service__ = __webpack_require__("../../../../../src/app/connection.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_app_connection_service__ = __webpack_require__("../../../../../src/app/connection.service.ts");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppComponent; });
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -97,17 +95,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 
 
-
 var AppComponent = (function () {
     function AppComponent(_connection) {
         var _this = this;
         this._connection = _connection;
-        this.socket = __WEBPACK_IMPORTED_MODULE_1_socket_io_client__["connect"]();
+        console.log('at app');
         this._connection.getSockets().subscribe(function (message) {
             _this.message = message;
             console.log("we did it!", _this.message);
         });
     }
+    AppComponent.prototype.ngOnDestroy = function () {
+        this.socket.disconnect();
+    };
+    AppComponent.prototype.ngOnInit = function () {
+    };
     return AppComponent;
 }());
 AppComponent = __decorate([
@@ -116,7 +118,7 @@ AppComponent = __decorate([
         template: __webpack_require__("../../../../../src/app/app.component.html"),
         styles: [__webpack_require__("../../../../../src/app/app.component.css")]
     }),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_2_app_connection_service__["a" /* ConnectionService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_2_app_connection_service__["a" /* ConnectionService */]) === "function" && _a || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1_app_connection_service__["a" /* ConnectionService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1_app_connection_service__["a" /* ConnectionService */]) === "function" && _a || Object])
 ], AppComponent);
 
 var _a;
@@ -301,6 +303,7 @@ CapitalizePipe = __decorate([
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__angular_http__ = __webpack_require__("../../../http/@angular/http.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__ = __webpack_require__("../../../../angular2-cookie/services/cookies.service.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__angular_router__ = __webpack_require__("../../../router/@angular/router.es5.js");
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ConnectionService; });
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -317,12 +320,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
 var ConnectionService = (function () {
-    function ConnectionService(_http, _cookie) {
+    function ConnectionService(_http, _cookie, _router) {
         this._http = _http;
         this._cookie = _cookie;
-        //private url = 'http://localhost:8000'; 
-        this.url = 'https://jeopardysockets.herokuapp.com';
+        this._router = _router;
+        this.url = 'http://localhost:8000';
+        //private url = 'https://jeopardysockets.herokuapp.com';
         this.observedGame = new __WEBPACK_IMPORTED_MODULE_2_rxjs__["BehaviorSubject"](null);
         //connect to socket on server
         this.socket = __WEBPACK_IMPORTED_MODULE_3_socket_io_client__(this.url);
@@ -335,8 +340,10 @@ var ConnectionService = (function () {
         //make new observable for changes in sockets
         var observable = new __WEBPACK_IMPORTED_MODULE_1_rxjs_Observable__["Observable"](function (observer) {
             //socket functions go here
-            _this.socket.on('server_response', function (data) {
-                observer.next(data);
+            _this.socket.on('game_update', function (data) {
+                console.log("game received", data);
+                localStorage.setItem('game', JSON.stringify(data));
+                this._router;
             });
             return function () {
                 _this.socket.disconnect();
@@ -347,48 +354,39 @@ var ConnectionService = (function () {
     ConnectionService.prototype.joinGame = function () {
         this.socket.emit('player_joined', { userName: "kbible" });
     };
-    ConnectionService.prototype.categories = function (game) {
-        var titleArr = [];
-        var arr = [];
-        var dict = {};
-        for (var _i = 0, game_1 = game; _i < game_1.length; _i++) {
-            var i = game_1[_i];
-            if (!dict[i.category.title]) {
-                titleArr.push(i.category.title);
-                dict[i.category.title] = [];
-                dict[i.category.title].push(i);
-            }
-            else {
-                dict[i.category.title].push(i);
-            }
-        }
-        for (var _a = 0, titleArr_1 = titleArr; _a < titleArr_1.length; _a++) {
-            var j = titleArr_1[_a];
-            arr.push({ name: j, questions: dict[j] });
-        }
-        console.log(arr);
-        return arr;
-    };
+    //   categories(game) {
+    //   var titleArr =[]
+    //   var arr=[]
+    //   var dict = {}
+    //   for (var i of game) {
+    //     if (!dict[i.category.title]) {
+    //       titleArr.push(i.category.title)
+    //       dict[i.category.title] = []
+    //       dict[i.category.title].push(i)
+    //     }
+    //     else {
+    //       dict[i.category.title].push(i)
+    //     }
+    //   }
+    //   for (var j of titleArr) {
+    //     arr.push({name: j,questions:dict[j]})
+    //   }
+    //   console.log(arr)
+    //   return arr
+    // }
     //gets a random game, takes the airdate, and grabs all categories and questions from that airdate
     ConnectionService.prototype.startNewGame = function () {
-        var _this = this;
-        this._http.get('http://jservice.io/api/random')
-            .map(function (data) {
-            var date = data.json()[0].airdate;
-            _this._http.get('http://jservice.io/api/clues?min_date=' + date + '&max_date=' + date)
-                .map(function (data) { localStorage.setItem('game', JSON.stringify(_this.categories(data.json()))); })
-                .toPromise();
-        })
-            .toPromise();
+        console.log('starting game');
+        this.socket.emit('new_game');
     };
     return ConnectionService;
 }());
 ConnectionService = __decorate([
     __webpack_require__.i(__WEBPACK_IMPORTED_MODULE_0__angular_core__["Injectable"])(),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_4__angular_http__["b" /* Http */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_4__angular_http__["b" /* Http */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__["CookieService"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__["CookieService"]) === "function" && _b || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_4__angular_http__["b" /* Http */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_4__angular_http__["b" /* Http */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__["CookieService"] !== "undefined" && __WEBPACK_IMPORTED_MODULE_5_angular2_cookie_services_cookies_service__["CookieService"]) === "function" && _b || Object, typeof (_c = typeof __WEBPACK_IMPORTED_MODULE_6__angular_router__["a" /* Router */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_6__angular_router__["a" /* Router */]) === "function" && _c || Object])
 ], ConnectionService);
 
-var _a, _b;
+var _a, _b, _c;
 //# sourceMappingURL=connection.service.js.map
 
 /***/ }),
@@ -449,9 +447,9 @@ var GameboardComponent = (function () {
         this.game = [];
         this.arr = [0, 1, 2, 3, 4];
         var parsed_game = JSON.parse(localStorage.getItem('game'));
-        console.log(parsed_game);
+        // console.log(parsed_game)
         this.game = parsed_game;
-        console.log(this.game);
+        // console.log(this.game)
     }
     GameboardComponent.prototype.show = function (question) {
         this.question = question;
@@ -512,7 +510,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/landing/landing.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container text-center\">\n  <h1>Jeopardy!</h1>\n  <a [routerLink]=\"['/gameboard']\" class=\"question option\" (click)=\"getGame()\">Start a new game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" (click)=\"joinGame()\">Join a game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\">Be Alex Trebek</a>\n</div>"
+module.exports = "<div class=\"container text-center\">\n  <h1>Jeopardy!</h1>\n  <a href=\"javascript:void(0);\" class=\"question option\" (click)=\"getGame()\">Start a new game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" (click)=\"joinGame()\">Join a game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\">Be Alex Trebek</a>\n</div>"
 
 /***/ }),
 

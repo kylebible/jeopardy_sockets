@@ -17,9 +17,9 @@ export class GameboardComponent implements OnInit {
 
   constructor(private _connection:ConnectionService, private  _cookie:CookieService) {
     var parsed_game = JSON.parse(localStorage.getItem('game'))
-    console.log(parsed_game)
+    // console.log(parsed_game)
     this.game = parsed_game
-    console.log(this.game)
+    // console.log(this.game)
    }
 
    show(question) {

@@ -8,7 +8,7 @@ import { ConnectionService } from "app/connection.service";
 })
 export class LandingComponent implements OnInit {
 
-  constructor(private _connection: ConnectionService) { }
+  constructor(private _connection: ConnectionService) {   }
 
   ngOnInit() {
   }
