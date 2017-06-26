@@ -50,16 +50,18 @@ io.sockets.on('connection', function (socket) {
                     }
                     else {
                         var newgame = JSON.parse(random_game)
-                        console.log("new_game",newgame)
                         newgame = categories(newgame)
-                        console.log("new game after categories",newgame)
                         game = newgame
-                        console.log("emitting game!", game)
                         io.emit('game_update',game)
                     }
                 })
             }
         })
+
+  })
+
+  socket.on('disconnect',function() {
+    console.log("disconnecting")
   })
 
 

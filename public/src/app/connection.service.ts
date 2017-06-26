@@ -33,23 +33,6 @@ export class ConnectionService {
     this.observedGame.next(data)
   }
 
-  // getSockets() {
-  //   //make new observable for changes in sockets
-  //   let observable = new Observable(observer => {
-  //     //socket functions go here
-  //     this.socket.on('game_update', function (data){
-  //       console.log("game received",data)
-  //       localStorage.setItem('game',JSON.stringify(data))
-  //     });
-      
-  //     return () => {
-  //       this.socket.disconnect();
-  //     }
-
-  //   })
-  //   return observable;
-  // }
-
   joinGame() {
     this.socket.emit('player_joined', {userName: "kbible"})
   }
@@ -84,6 +67,10 @@ export class ConnectionService {
   startNewGame() {
     console.log('starting game')
     this.socket.emit('new_game')
+  }
+
+  disconnect() {
+    this.socket.disconnect()
   }
 
 }

@@ -337,20 +337,6 @@ var ConnectionService = (function () {
     ConnectionService.prototype.updategame = function (data) {
         this.observedGame.next(data);
     };
-    // getSockets() {
-    //   //make new observable for changes in sockets
-    //   let observable = new Observable(observer => {
-    //     //socket functions go here
-    //     this.socket.on('game_update', function (data){
-    //       console.log("game received",data)
-    //       localStorage.setItem('game',JSON.stringify(data))
-    //     });
-    //     return () => {
-    //       this.socket.disconnect();
-    //     }
-    //   })
-    //   return observable;
-    // }
     ConnectionService.prototype.joinGame = function () {
         this.socket.emit('player_joined', { userName: "kbible" });
     };
@@ -381,6 +367,9 @@ var ConnectionService = (function () {
     ConnectionService.prototype.startNewGame = function () {
         console.log('starting game');
         this.socket.emit('new_game');
+    };
+    ConnectionService.prototype.disconnect = function () {
+        this.socket.disconnect();
     };
     return ConnectionService;
 }());
