@@ -8,7 +8,7 @@ import { CookieService } from "angular2-cookie/services/cookies.service";
 @Injectable()
 export class ConnectionService {
   private socket;
-  private url = 'http://localhost:8000';
+  private url = 'http://jeopardysockets.herokuapp.com';
   observedGame = new BehaviorSubject(null)
 
   constructor(private _http: Http, private _cookie:CookieService) { }
@@ -54,9 +54,9 @@ export class ConnectionService {
 
 //gets a random game, takes the airdate, and grabs all categories and questions from that airdate
   startNewGame() {
-    this._http.get('https://jservice.io/api/random')
+    this._http.get('http://jservice.io/api/random')
     .map((data)=>{var date = data.json()[0].airdate;
-      this._http.get('https://jservice.io/api/clues?min_date='+date+'&max_date='+date)
+      this._http.get('http://jservice.io/api/clues?min_date='+date+'&max_date='+date)
     .map((data)=> {localStorage.setItem('game',JSON.stringify(this.categories(data.json())))})
     .toPromise()
     })

@@ -325,7 +325,7 @@ var ConnectionService = (function () {
     function ConnectionService(_http, _cookie) {
         this._http = _http;
         this._cookie = _cookie;
-        this.url = 'http://localhost:8000';
+        this.url = 'http://jeopardysockets.herokuapp.com';
         this.observedGame = new __WEBPACK_IMPORTED_MODULE_2_rxjs__["BehaviorSubject"](null);
     }
     ConnectionService.prototype.updategame = function (data) {
@@ -369,10 +369,10 @@ var ConnectionService = (function () {
     //gets a random game, takes the airdate, and grabs all categories and questions from that airdate
     ConnectionService.prototype.startNewGame = function () {
         var _this = this;
-        this._http.get('https://jservice.io/api/random')
+        this._http.get('http://jservice.io/api/random')
             .map(function (data) {
             var date = data.json()[0].airdate;
-            _this._http.get('https://jservice.io/api/clues?min_date=' + date + '&max_date=' + date)
+            _this._http.get('http://jservice.io/api/clues?min_date=' + date + '&max_date=' + date)
                 .map(function (data) { localStorage.setItem('game', JSON.stringify(_this.categories(data.json()))); })
                 .toPromise();
         })
