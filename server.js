@@ -38,13 +38,13 @@ io.sockets.on('connection', function (socket) {
 
   socket.on('new_game', function() {
     console.log('receiving new_game')
-    request('http://jservice.io/api/random',function(err,response,random_clue) {
+    request('https://jservice.io/api/random',function(err,response,random_clue) {
             if (err) {
                 console.log(err)
             }
             else {
                 var date = JSON.parse(random_clue)[0].airdate
-                request('http://jservice.io/api/clues?min_date='+date+'&max_date='+date, function(err,response,random_game) {
+                request('https://jservice.io/api/clues?min_date='+date+'&max_date='+date, function(err,response,random_game) {
                     if (err) {
                         console.log(err)
                     }
