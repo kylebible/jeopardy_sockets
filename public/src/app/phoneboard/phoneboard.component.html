@@ -20,12 +20,20 @@
 <div *ngIf="!ready">
   <h1 class="question text-center">Waiting for other Players!</h1>
 </div>
-<div *ngIf="buzzermode" id="container" class="row">
+<div *ngIf="buzzermode && canAnswer" id="container" class="row">
   <button type="button" class="buzzer btn btn-primary" (click)="buzzin()">Buzz In!</button>
 </div>
-<div *ngIf="!myTurn && ready && buzzedInPlayer.length<1">
+<div *ngIf="!myTurn && ready && buzzedInPlayer.length<1 && canAnswer">
   <h1 class="question text-center">Not your turn!</h1>
+</div>
+<div *ngIf="!canAnswer && buzzedInPlayer.length<1">
+  <h1 class="question text-center">You've already buzzed in!</h1>
 </div>
 <div *ngIf="buzzedInPlayer.length>0">
   <h1 class="question text-center">{{buzzedInPlayer}} Buzzed In!</h1>
 </div>
+  <p>buzzer mode: {{buzzermode}}</p>
+  <p>my turn: {{myTurn}}</p>
+  <p>ready: {{ready}} </p>
+  <p>buzzed in player: {{buzzedInPlayer}} </p>
+  <p>can answer?: {{canAnswer}} </p>

@@ -345,7 +345,8 @@ var ConnectionService = (function () {
         this._cookie = _cookie;
         this._router = _router;
         this.port = 8000;
-        this.url = 'http://localhost:' + this.port;
+        // private url = 'http://localhost:' + this.port; 
+        this.url = 'https://jeopardysockets.herokuapp.com';
         this.socketSubscription = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedData = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedGame = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
@@ -357,6 +358,8 @@ var ConnectionService = (function () {
         this.observedGameReady = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedBuzzedInPlayer = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedPlayersTurn = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
+        this.observedEligiblePlayers = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
+        this.observedAnswerStatus = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.socket = __WEBPACK_IMPORTED_MODULE_2_socket_io_client__(this.url);
         this.socket.on('update_game', function (response) {
             this.observedGame.next(response);
@@ -378,6 +381,7 @@ var ConnectionService = (function () {
         }.bind(this));
         this.socket.on('buzzIn', function (player) {
             console.log('buzzed in player', player);
+            this.buzzedinplayer = player;
             if (player.id == this.socket.id) {
                 this.observedBuzzedInPlayer.next("You");
             }
@@ -396,6 +400,42 @@ var ConnectionService = (function () {
             }
             console.log(player);
             this.observedPlayersTurn.next(player.userName);
+        }.bind(this));
+        this.socket.on('correct-Answer', function (player) {
+            if (this.socket.id == player) {
+                this.observedTurnStatus.next(true);
+            }
+            else {
+                this.observedTurnStatus.next(false);
+            }
+            console.log('after server correct answer');
+            this.observedBuzzedInPlayer.next("");
+            this.buzzedinplayer = null;
+            this.observedQuestionView.next(null);
+            this.observedAnswerStatus.next(true);
+        }.bind(this));
+        this.socket.on('eligiblePlayers', function (players) {
+            console.log("players", players);
+            this.observedEligiblePlayers.next(players);
+        }.bind(this));
+        this.socket.on('playerIncorrect', function (players) {
+            console.log("incorrect answer. Playser Left: ", players);
+            if (Object.keys(players).length < 1) {
+                console.log("no players left");
+                this.observedQuestionView.next(null);
+                this.observedAnswerStatus.next(true);
+                this.observedBuzzInStatus.next(false);
+            }
+            else if (this.socket.id in players) {
+                this.observedBuzzInStatus.next(true);
+                this.observedAnswerStatus.next(true);
+            }
+            else {
+                this.observedBuzzInStatus.next(true);
+                this.observedAnswerStatus.next(false);
+            }
+            this.observedBuzzedInPlayer.next("");
+            this.buzzedinplayer = null;
         }.bind(this));
         this.socket.on('resetServer', function () {
             console.log("in socket");
@@ -439,6 +479,18 @@ var ConnectionService = (function () {
         console.log('resetting');
         this.socket.emit('resetServer');
     };
+    ConnectionService.prototype.playerCorrect = function () {
+        console.log('emitting playercorrect to server');
+        this.socket.emit('correctAnswer', this.buzzedinplayer["id"]);
+        this.resetEligiblePlayers();
+    };
+    ConnectionService.prototype.playerIncorrect = function () {
+        console.log("buzzed in guy", this.buzzedinplayer);
+        this.socket.emit('playerIncorrect', this.buzzedinplayer["id"]);
+    };
+    ConnectionService.prototype.resetEligiblePlayers = function () {
+        this.socket.emit('resetEligiblePlayers');
+    };
     return ConnectionService;
 }());
 ConnectionService = __decorate([
@@ -472,7 +524,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/gameboard/gameboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<table class=\"board\" *ngIf=\"!text_visible\">\n  <thead>\n      <tr>\n          <th *ngFor=\"let category of game\"><span>{{category.name | capitalize}}</span>&nbsp;</th>\n      </tr>\n    </thead>\n    <tbody>\n        <tr *ngFor=\"let i of arr\">\n            <td *ngFor=\"let category of game\" (click)=\"show(category.questions[i])\"><span *ngIf=\"!category.questions[i].asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span></td>\n        </tr>\n    </tbody>\n</table>\n<div *ngIf=\"text_visible\" style=\"vertical-align: middle\" (click)=\"question_clicked()\">\n    <h2 *ngIf=\"currentlyBuzzedIn\" class=\"buzzedin\">{{currentlyBuzzedIn}} buzzed in!</h2>\n    <h1 class=\"question\">{{text | uppercase}}</h1>\n</div>\n"
+module.exports = "<table class=\"board\" *ngIf=\"!text_visible\">\n  <thead>\n      <tr>\n          <th *ngFor=\"let category of game\"><span>{{category.name | capitalize}}</span>&nbsp;</th>\n      </tr>\n    </thead>\n    <tbody>\n        <tr *ngFor=\"let i of arr\">\n            <td *ngFor=\"let category of game\" (click)=\"show(category.questions[i])\"><span *ngIf=\"!category.questions[i].asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span></td>\n        </tr>\n    </tbody>\n</table>\n<div *ngIf=\"text_visible\" style=\"vertical-align: middle\" (click)=\"question_clicked()\">\n    <h2 *ngIf=\"buzzedInPlayer\" class=\"buzzedin\">{{buzzedInPlayer}} buzzed in!</h2>\n    <h1 class=\"question\">{{text | uppercase}}</h1>\n</div>\n"
 
 /***/ }),
 
@@ -507,17 +559,23 @@ var GameboardComponent = (function () {
         this.text = "";
         this.game = [];
         this.arr = [0, 1, 2, 3, 4];
-        this.currentlyBuzzedIn = "Kyle";
+        this.buzzedInPlayer = "";
         _connection.observedGame.subscribe(function (updatedGame) { return _this.game = updatedGame; }, function (err) { return console.log(err); });
         _connection.observedQuestionView.subscribe(function (currentQuestion) {
             console.log("changing question");
             if (currentQuestion) {
                 _this.show(currentQuestion);
             }
+            else if (_this.text_visible) {
+                _this.question_clicked();
+            }
         }, function (err) { return console.log(err); });
-        // console.log(parsed_game)
-        // this.game = parsed_game
-        // console.log(this.game)
+        _connection.observedBuzzedInPlayer.subscribe(function (currentlyBuzzedIn) { console.log('currentlybuzzedin', currentlyBuzzedIn); if (currentlyBuzzedIn) {
+            _this.buzzedInPlayer = currentlyBuzzedIn;
+        }
+        else {
+            _this.buzzedInPlayer = "";
+        } console.log('currentlybuzzedin', currentlyBuzzedIn); });
     }
     GameboardComponent.prototype.show = function (question) {
         for (var _i = 0, _a = this.game; _i < _a.length; _i++) {
@@ -540,6 +598,11 @@ var GameboardComponent = (function () {
         this._connection.updategame(this.game);
         this._connection.updateSocketGame(this.game);
     };
+    GameboardComponent.prototype.removeAnswer = function () {
+        this.status = "";
+        this.text_visible = false;
+        console.log("text visible", this.text_visible);
+    };
     GameboardComponent.prototype.question_clicked = function () {
         this.text = this.question["answer"];
         console.log("text visible", this.text_visible);
@@ -547,11 +610,12 @@ var GameboardComponent = (function () {
         if (this.status == "question") {
             this.status = "answer";
         }
-        else if (this.status == "answer") {
-            this.status = "";
-            this.text_visible = false;
-            console.log(this.text_visible);
-        }
+        var self = this;
+        setTimeout(function () {
+            console.log(self);
+            self.removeAnswer();
+            self._connection.resetEligiblePlayers();
+        }, 5000);
     };
     GameboardComponent.prototype.ngOnInit = function () {
     };
@@ -743,7 +807,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/phoneboard/phoneboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !buzzermode && buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <div *ngFor=\"let question of questions\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question)\"><span *ngIf=\"!question.asked\">{{question.value | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"buzzermode\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n<div *ngIf=\"!myTurn && ready && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>"
+module.exports = "<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !buzzermode && buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <div *ngFor=\"let question of questions\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question)\"><span *ngIf=\"!question.asked\">{{question.value | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"buzzermode && canAnswer\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n<div *ngIf=\"!myTurn && ready && buzzedInPlayer.length<1 && canAnswer\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"!canAnswer && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">You've already buzzed in!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>\n  <p>buzzer mode: {{buzzermode}}</p>\n  <p>my turn: {{myTurn}}</p>\n  <p>ready: {{ready}} </p>\n  <p>buzzed in player: {{buzzedInPlayer}} </p>\n  <p>can answer?: {{canAnswer}} </p>"
 
 /***/ }),
 
@@ -778,13 +842,21 @@ var PhoneboardComponent = (function () {
         this.myTurn = false;
         this.ready = false;
         this.buzzedInPlayer = "";
+        this.canAnswer = true;
         _connection.observedGame.subscribe(function (updatedGame) { _this.game = updatedGame; }, function (err) { return console.log(err); });
         _connection.observedBuzzInStatus.subscribe(function (currentBuzzerMode) { _this.buzzermode = currentBuzzerMode; console.log("buzzer mode in phone vies", _this.buzzermode); }, function (err) { return console.log(err); });
         _connection.observedGameReady.subscribe(function (currentReadiness) { _this.ready = currentReadiness; }, function (err) { return console.log(err); });
         _connection.observedTurnStatus.subscribe(function (currentTurnStatus) { _this.myTurn = currentTurnStatus; }, function (err) { return console.log(err); });
         _connection.observedBuzzedInPlayer.subscribe(function (currentlyBuzzedIn) { if (currentlyBuzzedIn) {
             _this.buzzedInPlayer = currentlyBuzzedIn;
-        } });
+        }
+        else {
+            _this.buzzedInPlayer = "";
+        } }, function (err) { return console.log(err); });
+        _connection.observedAnswerStatus.subscribe(function (currentAnswerStatus) { if (currentAnswerStatus != null) {
+            _this.canAnswer = currentAnswerStatus;
+        } ; console.log("cananswer", _this.canAnswer); }, function (err) { return console.log(err); });
+        //TO DO: resolve current answer status when question resets
     }
     PhoneboardComponent.prototype.ngOnInit = function () {
     };
@@ -798,6 +870,7 @@ var PhoneboardComponent = (function () {
     };
     PhoneboardComponent.prototype.buzzin = function () {
         this._connection.buzzIn();
+        this.canAnswer = false;
     };
     return PhoneboardComponent;
 }());
@@ -897,7 +970,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/trebekview/trebekview.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<h1 class=\"question text-center\">Trebek View</h1>\n<h1 class=\"question text-center\" (click)=\"resetServer()\">Reset Server</h1>\n<div class=\"container\" style=\"margin-top: 70%\" *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">{{numberPlayers}} players waiting</h1>\n  <h1 class=\"question text-center\" (click)=\"trebekready()\">Ready to start?</h1>\n</div>\n<div class=\"container\" style=\"margin-top: 70%\" *ngIf=\"ready && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">{{playerTurn}}'s turn</h1>\n</div>\n<div class=\"container\" style=\"margin-top: 70%\" *ngIf=\"ready && buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} buzzed In!</h1>\n  <h1 class=\"question text-center\" (click)=\"correct()\">Correct Answer?</h1>\n  <h1 class=\"question text-center\" (click)=\"incorrect()\">Incorrect Answer?</h1>\n</div>\n"
+module.exports = "<h1 class=\"question text-center\">Trebek View</h1>\n<h1 class=\"question text-center\" (click)=\"resetServer()\">Reset Server</h1>\n<div class=\"container\" style=\"margin-top: 70%\" *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">{{numberPlayers}} players waiting</h1>\n  <h1 class=\"question text-center\" (click)=\"trebekready()\">Ready to start?</h1>\n</div>\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length<1\">\n  <br><h1 class=\"question text-center\" *ngIf=\"answer.length>1\">{{answer}}</h1><br><br>\n  <h1 class=\"question text-center\">{{playerTurn}}'s turn</h1>\n</div>\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length>0\">\n  <br><h1 class=\"question text-center\">{{answer}}</h1><br><br>\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} buzzed In!</h1>\n  <h1 class=\"question text-center\" (click)=\"correct()\">Correct Answer?</h1>\n  <h1 class=\"question text-center\" (click)=\"incorrect()\">Incorrect Answer?</h1>\n</div>\n"
 
 /***/ }),
 
@@ -921,6 +994,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 var TrebekviewComponent = (function () {
     //this.numberPlayers = Object.keys(this.players).length
+    //TO DO: make ready? not appear when not enough players
     function TrebekviewComponent(_connection) {
         var _this = this;
         this._connection = _connection;
@@ -929,6 +1003,7 @@ var TrebekviewComponent = (function () {
         this.ready = false;
         this.playerTurn = "";
         this.buzzedInPlayer = "";
+        this.answer = "";
         this._connection.observedPlayers.subscribe(function (currentPlayers) {
             _this.players = currentPlayers;
             if (_this.players) {
@@ -937,9 +1012,18 @@ var TrebekviewComponent = (function () {
         }, function (err) { return console.log(err); });
         this._connection.observedGameReady.subscribe(function (readyStatus) { return _this.ready = readyStatus; }, function (err) { return console.log(err); });
         this._connection.observedPlayersTurn.subscribe(function (currentPlayer) { return _this.playerTurn = currentPlayer; }, function (err) { return console.log(err); });
-        this._connection.observedBuzzedInPlayer.subscribe(function (currentlybuzzedin) { if (currentlybuzzedin) {
+        this._connection.observedBuzzedInPlayer.subscribe(function (currentlybuzzedin) { console.log('buzzedinplayer', _this.buzzedInPlayer); if (currentlybuzzedin) {
             _this.buzzedInPlayer = currentlybuzzedin;
-        } }, function (err) { return console.log(err); });
+        }
+        else {
+            _this.buzzedInPlayer = "";
+        } console.log('currentlybuzzedin', _this.buzzedInPlayer); }, function (err) { return console.log(err); });
+        this._connection.observedQuestionView.subscribe(function (currentQuestion) { if (currentQuestion) {
+            _this.answer = currentQuestion.answer;
+        }
+        else {
+            _this.answer = "";
+        } });
     }
     TrebekviewComponent.prototype.ngOnInit = function () {
     };
@@ -949,6 +1033,13 @@ var TrebekviewComponent = (function () {
     };
     TrebekviewComponent.prototype.resetServer = function () {
         this._connection.resetServer();
+    };
+    TrebekviewComponent.prototype.correct = function () {
+        console.log('correct clicked');
+        this._connection.playerCorrect();
+    };
+    TrebekviewComponent.prototype.incorrect = function () {
+        this._connection.playerIncorrect();
     };
     return TrebekviewComponent;
 }());

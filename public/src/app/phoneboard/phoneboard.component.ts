@@ -14,6 +14,7 @@ export class PhoneboardComponent implements OnInit {
   myTurn = false;
   ready = false;
   buzzedInPlayer = ""
+  canAnswer = true;
 
   constructor(private _router:Router, private _connection:ConnectionService) {
     _connection.observedGame.subscribe(
@@ -25,7 +26,7 @@ export class PhoneboardComponent implements OnInit {
       (err) => console.log(err)
     )
 
-    _connection.observedGameReady.subscribe(
+    _connection.observedGameReady.subscribe( 
       (currentReadiness) => {this.ready = currentReadiness},
       (err)=> console.log(err)
     )
@@ -36,8 +37,16 @@ export class PhoneboardComponent implements OnInit {
     )
 
     _connection.observedBuzzedInPlayer.subscribe(
-      (currentlyBuzzedIn) => {if(currentlyBuzzedIn) {this.buzzedInPlayer = currentlyBuzzedIn}}
+      (currentlyBuzzedIn) => { if(currentlyBuzzedIn) {this.buzzedInPlayer = currentlyBuzzedIn} else {this.buzzedInPlayer = ""}},
+      (err)=>console.log(err)
     )
+
+    _connection.observedAnswerStatus.subscribe(
+      (currentAnswerStatus)=> {if (currentAnswerStatus != null){this.canAnswer = currentAnswerStatus}; console.log("cananswer",this.canAnswer)},
+      (err)=> console.log(err)
+    )
+
+    //TO DO: resolve current answer status when question resets
    }
 
   ngOnInit() {
@@ -55,6 +64,7 @@ export class PhoneboardComponent implements OnInit {
 
   buzzin() {
     this._connection.buzzIn()
+    this.canAnswer = false
   }
 
 }

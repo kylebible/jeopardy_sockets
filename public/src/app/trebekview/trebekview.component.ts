@@ -12,7 +12,10 @@ export class TrebekviewComponent implements OnInit {
   ready = false
   playerTurn = ""
   buzzedInPlayer = ""
+  answer= ""
   //this.numberPlayers = Object.keys(this.players).length
+
+  //TO DO: make ready? not appear when not enough players
 
   constructor(private _connection:ConnectionService) {
     this._connection.observedPlayers.subscribe(
@@ -33,8 +36,12 @@ export class TrebekviewComponent implements OnInit {
       (err) => console.log(err)
     )
     this._connection.observedBuzzedInPlayer.subscribe(
-      (currentlybuzzedin) => {if (currentlybuzzedin) {this.buzzedInPlayer = currentlybuzzedin}},
+      (currentlybuzzedin) => {console.log('buzzedinplayer',this.buzzedInPlayer); if (currentlybuzzedin) {this.buzzedInPlayer = currentlybuzzedin} else {this.buzzedInPlayer = ""} console.log('currentlybuzzedin',this.buzzedInPlayer)},
       (err) => console.log(err)
+    )
+
+    this._connection.observedQuestionView.subscribe(
+      (currentQuestion) => {if (currentQuestion){this.answer = currentQuestion.answer} else {this.answer = ""}}
     )
    }
 
@@ -50,4 +57,12 @@ export class TrebekviewComponent implements OnInit {
     this._connection.resetServer()
   }
 
+  correct() {
+    console.log('correct clicked')
+    this._connection.playerCorrect()
+  }
+
+  incorrect() {
+    this._connection.playerIncorrect()
+  }
 }

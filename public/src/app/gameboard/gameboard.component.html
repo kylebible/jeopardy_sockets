@@ -11,6 +11,6 @@
     </tbody>
 </table>
 <div *ngIf="text_visible" style="vertical-align: middle" (click)="question_clicked()">
-    <h2 *ngIf="currentlyBuzzedIn" class="buzzedin">{{currentlyBuzzedIn}} buzzed in!</h2>
+    <h2 *ngIf="buzzedInPlayer" class="buzzedin">{{buzzedInPlayer}} buzzed in!</h2>
     <h1 class="question">{{text | uppercase}}</h1>
 </div>

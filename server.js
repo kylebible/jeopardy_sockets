@@ -20,6 +20,7 @@ var server = app.listen(port, function() {
 var players = {}
 var game = [];
 var trebekready = false;
+var eligiblePlayers = {}
 
 var io = require('socket.io').listen(server)
 
@@ -46,6 +47,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('trebekready', function() {
     console.log('trebekready)')
     trebekready = true
+    eligiblePlayers = players
     if (Object.keys(players).length >= 2 && trebekready) {
         io.emit('ready', true)
         io.emit('firstTurn',players[Object.keys(players)[0]])
@@ -120,7 +122,26 @@ io.sockets.on('connection', function (socket) {
       players={}
       game = []
       trebekready = false
+      eligiblePlayers = {}
       io.emit('resetServer')
+    })
+
+    socket.on('correctAnswer', function(player) {
+      io.emit('correct-Answer',player)
+    })
+
+    socket.on('resetEligiblePlayers',function() {
+      eligibilePlayers = players
+      console.log('eligible players',eligiblePlayers)
+      io.emit('eligibilePlayers',players)
+    })
+
+    socket.on('playerIncorrect', function(player) {
+      console.log(socket.id,player)
+      console.log('player incorrect',eligiblePlayers)
+      delete eligiblePlayers[player]
+      console.log('player incorrect',eligiblePlayers)
+      io.emit('playerIncorrect',eligiblePlayers)
     })
 
 

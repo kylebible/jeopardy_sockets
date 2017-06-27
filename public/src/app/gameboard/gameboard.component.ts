@@ -14,7 +14,7 @@ export class GameboardComponent implements OnInit {
   text = ""
   game = []
   arr = [0,1,2,3,4]
-  currentlyBuzzedIn = "Kyle"
+  buzzedInPlayer = ""
 
   constructor(private _connection:ConnectionService, private  _cookie:CookieService) {
     _connection.observedGame.subscribe(
@@ -24,13 +24,14 @@ export class GameboardComponent implements OnInit {
 
     _connection.observedQuestionView.subscribe(
       (currentQuestion)=> {console.log("changing question"); 
-        if(currentQuestion) {this.show(currentQuestion)}},
+        if(currentQuestion) {this.show(currentQuestion)} else if (this.text_visible){this.question_clicked()}},
       (err) => console.log(err)
     )
 
-    // console.log(parsed_game)
-    // this.game = parsed_game
-    // console.log(this.game)
+     _connection.observedBuzzedInPlayer.subscribe(
+      (currentlyBuzzedIn) => {console.log('currentlybuzzedin',currentlyBuzzedIn); if(currentlyBuzzedIn) {this.buzzedInPlayer = currentlyBuzzedIn} else {this.buzzedInPlayer = ""} console.log('currentlybuzzedin',currentlyBuzzedIn)}
+    )
+
    }
 
    show(question) {
@@ -53,6 +54,12 @@ export class GameboardComponent implements OnInit {
      this._connection.updateSocketGame(this.game)
    }
 
+   removeAnswer() {
+     this.status = ""
+        this.text_visible = false
+        console.log("text visible",this.text_visible)
+   }
+
    question_clicked() {
      this.text = this.question["answer"]
      console.log("text visible",this.text_visible)
@@ -60,12 +67,14 @@ export class GameboardComponent implements OnInit {
      if (this.status == "question") {
        this.status = "answer"
      }
-    else if (this.status == "answer") {
-       this.status = ""
-       this.text_visible = false
-       console.log(this.text_visible)
-     }
+     var self = this
+    setTimeout(function() {
+        console.log(self)
+        self.removeAnswer()
+        self._connection.resetEligiblePlayers()
+     },5000)
    }
+
 
   ngOnInit() {
   }

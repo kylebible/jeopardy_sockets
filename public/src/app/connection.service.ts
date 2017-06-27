@@ -11,8 +11,8 @@ declare var process:any
 @Injectable()
 export class ConnectionService implements OnDestroy {
   port = 8000
-  private url = 'http://localhost:' + this.port; 
-  // private url = 'https://jeopardysockets.herokuapp.com';
+  // private url = 'http://localhost:' + this.port; 
+  private url = 'https://jeopardysockets.herokuapp.com';
   socket;
   socketSubscription = new BehaviorSubject(null)
   observedData = new BehaviorSubject(null)
@@ -25,7 +25,9 @@ export class ConnectionService implements OnDestroy {
   observedGameReady = new BehaviorSubject(null)
   observedBuzzedInPlayer = new BehaviorSubject(null)
   observedPlayersTurn = new BehaviorSubject(null)
-
+  observedEligiblePlayers = new BehaviorSubject(null)
+  observedAnswerStatus = new BehaviorSubject(null)
+  buzzedinplayer: object;
   
 
   constructor(private _http: Http, private _cookie:CookieService, private _router:Router) {
@@ -55,6 +57,7 @@ export class ConnectionService implements OnDestroy {
 
       this.socket.on('buzzIn', function(player) {
         console.log('buzzed in player',player)
+        this.buzzedinplayer = player
         if (player.id == this.socket.id) {
           this.observedBuzzedInPlayer.next("You")
         }
@@ -75,11 +78,53 @@ export class ConnectionService implements OnDestroy {
         this.observedPlayersTurn.next(player.userName)
       }.bind(this))
 
+      this.socket.on('correct-Answer', function(player) {
+        if (this.socket.id == player) {
+          this.observedTurnStatus.next(true)
+        }
+        else {
+          this.observedTurnStatus.next(false)
+        }
+        console.log('after server correct answer')
+        this.observedBuzzedInPlayer.next("")
+        this.buzzedinplayer = null
+        this.observedQuestionView.next(null)
+        this.observedAnswerStatus.next(true)
+      }.bind(this))
+
+      this.socket.on('eligiblePlayers', function(players) {
+        console.log("players",players)
+        this.observedEligiblePlayers.next(players)
+      }.bind(this))
+
+      this.socket.on('playerIncorrect', function(players) {
+        console.log("incorrect answer. Playser Left: ",players)
+        if (Object.keys(players).length<1) {
+          console.log("no players left")
+          this.observedQuestionView.next(null)
+          this.observedAnswerStatus.next(true)
+          this.observedBuzzInStatus.next(false)
+        }
+        else if(this.socket.id in players) {
+          this.observedBuzzInStatus.next(true)
+          this.observedAnswerStatus.next(true)
+        }
+        else {
+          this.observedBuzzInStatus.next(true)
+          this.observedAnswerStatus.next(false)
+        }
+        this.observedBuzzedInPlayer.next("")
+        this.buzzedinplayer = null
+        
+      }.bind(this))
+        
+      
+
+
       this.socket.on('resetServer',function() {
         console.log("in socket")
         window.location.replace('/')
       }.bind(this))
-        
       
 
    }
@@ -132,6 +177,21 @@ export class ConnectionService implements OnDestroy {
   resetServer() {
     console.log('resetting')
     this.socket.emit('resetServer')
+  }
+
+  playerCorrect() {
+    console.log('emitting playercorrect to server')
+    this.socket.emit('correctAnswer',this.buzzedinplayer["id"])
+    this.resetEligiblePlayers()
+  }
+
+  playerIncorrect() {
+    console.log("buzzed in guy",this.buzzedinplayer)
+    this.socket.emit('playerIncorrect',this.buzzedinplayer["id"])
+  }
+
+  resetEligiblePlayers() {
+    this.socket.emit('resetEligiblePlayers')
   }
 
 }
