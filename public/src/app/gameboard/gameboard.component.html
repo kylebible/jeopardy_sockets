@@ -6,10 +6,11 @@
     </thead>
     <tbody>
         <tr *ngFor="let i of arr">
-            <td *ngFor="let category of game" (click)="show(category.questions[i])"><span *ngIf="!category.questions[i].asked">{{(i+1)*100}}</span></td>
+            <td *ngFor="let category of game" (click)="show(category.questions[i])"><span *ngIf="!category.questions[i].asked">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span></td>
         </tr>
     </tbody>
 </table>
 <div *ngIf="text_visible" style="vertical-align: middle" (click)="question_clicked()">
-  <h1 class="question">{{text | uppercase}}</h1>
+    <h2 *ngIf="currentlyBuzzedIn" class="buzzedin">{{currentlyBuzzedIn}} buzzed in!</h2>
+    <h1 class="question">{{text | uppercase}}</h1>
 </div>

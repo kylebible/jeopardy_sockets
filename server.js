@@ -18,7 +18,8 @@ var server = app.listen(port, function() {
 })
 
 var players = {}
-var game = []
+var game = [];
+var trebekready = false;
 
 var io = require('socket.io').listen(server)
 
@@ -26,6 +27,7 @@ io.sockets.on('connection', function (socket) {
   
   console.log(socket.id);
 
+  console.log('someone joined the game',game)
   socket.on('player_joined', function(player) {
     console.log('player_joined')
     players[socket.id] = player;
@@ -34,17 +36,31 @@ io.sockets.on('connection', function (socket) {
     for (var key in players) {
             console.log("Players: " + key + " : " + players[key].userName);
         }
+    socket.broadcast.emit('player_joined',players)
+    if (Object.keys(players).length >= 2 && trebekready) {
+        console.log('ready')
+        io.emit('ready', true)
+      }
+  })
+
+  socket.on('trebekready', function() {
+    console.log('trebekready)')
+    trebekready = true
+    if (Object.keys(players).length >= 2 && trebekready) {
+        io.emit('ready', true)
+        io.emit('firstTurn',Object.keys(players)[0])
+      }
   })
 
   socket.on('new_game', function() {
     console.log('receiving new_game')
-    request('https://jservice.io/api/random',function(err,response,random_clue) {
+    request('http://jservice.io/api/random',function(err,response,random_clue) {
             if (err) {
                 console.log(err)
             }
             else {
                 var date = JSON.parse(random_clue)[0].airdate
-                request('https://jservice.io/api/clues?min_date='+date+'&max_date='+date, function(err,response,random_game) {
+                request('http://jservice.io/api/clues?min_date='+date+'&max_date='+date, function(err,response,random_game) {
                     if (err) {
                         console.log(err)
                     }
@@ -52,7 +68,8 @@ io.sockets.on('connection', function (socket) {
                         var newgame = JSON.parse(random_game)
                         newgame = categories(newgame)
                         game = newgame
-                        io.emit('game_update',game)
+                        io.emit('new_game',game)
+                        console.log('game-emitted',game)
                     }
                 })
             }
@@ -60,23 +77,46 @@ io.sockets.on('connection', function (socket) {
 
   })
 
-  socket.on('disconnect',function() {
-    console.log("disconnecting")
+  socket.on('get_game',function() {
+    console.log('updating-game',game)
+    socket.emit('update_game',game)
   })
 
+  socket.on('update_game',function(updatedGame) {
+    game = updatedGame
+    socket.broadcast.emit('update_game',game)
+  })
 
+  socket.on('display-question',function(question) {
+    socket.broadcast.emit('show-question',question)
+    socket.broadcast.emit('updateBuzzer',true)
+  })
 
+  socket.on('disconnect',function() {
+    if (players[socket.id] != null) {
+      io.emit('playerLeft',players[socket.id])
+      delete players[socket.id]
 
-  // socket.on('button_press', function(data) {
-  //   console.log('someone pressed a button',data)
-  //   io.emit('server_response', {response: "sockets are the best!"})
-  // })
+      for (var key in players) {
+        console.log("players remaining:" + key + " : " + players[key].userName);
+      }
+
+      if (Object.keys(players).length < 2) {
+        io.sockets.emit('ready', false)
+      }
+    }
+
+  })
+
+  socket.on('player_buzzed_in', function() {
+      console.log("buzzed in")
+      io.emit('buzzIn',players[socket.id])
+    })
 
 
 })
 
 function categories(found_game) {
-  console.log('in categories',found_game)
   var titleArr =[]
   var arr=[]
   var dict = {}
@@ -97,6 +137,5 @@ function categories(found_game) {
   for (var j of titleArr) {
     arr.push({name: j,questions:dict[j]})
   }
-  console.log("in categories",arr)
   return arr
 }

@@ -61,3 +61,11 @@ div a {
     text-shadow: 1px 3px 5px black;
     font-weight: bold;
 }
+
+.buzzedin {
+    font-family: Korinna;
+    color: white;
+    font-size: 5vw;
+    text-align: center;
+    margin-top: 10%
+}

@@ -1,6 +1,6 @@
 <div class="container text-center">
-  <h1>Jeopardy!</h1>
-  <a href="javascript:void(0);" class="question option" (click)="getGame()">Start a new game</a><br>
-  <a href="javascript:void(0);" class="question option" (click)="joinGame()">Join a game</a><br>
-  <a href="javascript:void(0);" class="question option">Be Alex Trebek</a>
+  <h1>Jeopardy Frenzy!</h1>
+  <a href="javascript:void(0);" class="question option" (click)="getGame()" *ngIf="!game">Start a new game</a><br>
+  <a href="javascript:void(0);" class="question option" [routerLink]='["/username"]'>Join a game</a><br>
+  <a href="javascript:void(0);" class="question option" [routerLink]='["/trebekview"]'>Be Alex Trebek</a>
 </div>

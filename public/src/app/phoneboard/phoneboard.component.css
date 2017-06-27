@@ -1,0 +1,16 @@
+.question {
+    font-family: Korinna;
+    color: white;
+}
+
+.buzzer {
+    height: 100%;
+    width: 100%;
+    font-size: 15vw;
+}
+
+#container {
+    height: 100%;
+    width: 100%;
+    background-color: red;
+}

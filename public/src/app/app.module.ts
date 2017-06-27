@@ -12,6 +12,10 @@ import { LandingComponent } from './landing/landing.component';
 import { CapitalizePipe } from './capitalize.pipe';
 import {CookieService} from 'angular2-cookie/services/cookies.service';
 import { QuestionComponent } from './question/question.component';
+import { UsernameComponent } from './landing/username/username.component';
+import { PhoneboardComponent } from './phoneboard/phoneboard.component';
+import { ValuechoicesComponent } from './valuechoices/valuechoices.component';
+import { TrebekviewComponent } from './trebekview/trebekview.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +24,11 @@ import { QuestionComponent } from './question/question.component';
     BuzzerComponent,
     LandingComponent,
     CapitalizePipe,
-    QuestionComponent
+    QuestionComponent,
+    UsernameComponent,
+    PhoneboardComponent,
+    ValuechoicesComponent,
+    TrebekviewComponent
   ],
   imports: [
     BrowserModule,

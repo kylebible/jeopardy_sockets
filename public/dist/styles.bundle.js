@@ -49,7 +49,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "/* You can add global styles to this file, and also import other style files */\n@font-face {\n    font-family: Korinna;\n    src: url(" + __webpack_require__("../../../../../src/assets/Korinna.ttf") + ");\n    font-weight: bold;\n}\n\n@font-face {\n    font-family: Jeopardy;\n    src: url(" + __webpack_require__("../../../../../src/assets/gyparody.heavy.ttf") + ");\n    font-weight: bold;\n}\n\n* {\n    font-family: Korinna;\n}\n\nbody {\n    background-color: #070CEC\n}", ""]);
+exports.push([module.i, "/* You can add global styles to this file, and also import other style files */\n@font-face {\n    font-family: Korinna;\n    src: url(" + __webpack_require__("../../../../../src/assets/Korinna.ttf") + ");\n    font-weight: bold;\n}\n\n@font-face {\n    font-family: Jeopardy;\n    src: url(" + __webpack_require__("../../../../../src/assets/gyparody.heavy.ttf") + ");\n    font-weight: bold;\n}\n\n* {\n    font-family: Korinna;\n}\n\nbody {\n    background-color: #070CEC\n}\n\nhtml, body {\n    height:100%;\n}", ""]);
 
 // exports
 

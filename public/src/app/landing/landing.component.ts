@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ConnectionService } from "app/connection.service";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'app-landing',
@@ -7,8 +8,14 @@ import { ConnectionService } from "app/connection.service";
   styleUrls: ['./landing.component.css']
 })
 export class LandingComponent implements OnInit {
+  game = []
 
-  constructor(private _connection: ConnectionService) {   }
+  constructor(private _connection: ConnectionService, private _router:Router) {
+    _connection.observedGame.subscribe(
+      (currentGame)=> this.game = currentGame,
+      (err)=>console.log(err)
+    )
+    }
 
   ngOnInit() {
   }
@@ -16,11 +23,7 @@ export class LandingComponent implements OnInit {
   getGame() {
     console.log("get game")
     this._connection.startNewGame()
-  }
-
-  joinGame() {
-    console.log('join game')
-    this._connection.joinGame()
+    this._router.navigate(['/gameboard'])
   }
 
 }

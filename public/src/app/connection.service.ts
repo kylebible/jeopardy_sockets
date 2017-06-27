@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import {BehaviorSubject} from 'rxjs'
 import * as io from 'socket.io-client';
@@ -8,60 +8,83 @@ import { Router } from "@angular/router";
 declare var process:any
 
 @Injectable()
-export class ConnectionService {
+export class ConnectionService implements OnDestroy {
   port = 8000
-  //private url = 'http://localhost:' + this.port; 
+  // private url = 'http://localhost:' + this.port; 
   private url = 'https://jeopardysockets.herokuapp.com';
-  observedGame = new BehaviorSubject(null)
   socket;
+  socketSubscription = new BehaviorSubject(null)
+  observedData = new BehaviorSubject(null)
+  observedGame = new BehaviorSubject(null)
+  observedGameView = new BehaviorSubject(null)
+  observedQuestionView = new BehaviorSubject(null)
+  observedBuzzInStatus = new BehaviorSubject(null)
+  observedTurnStatus = new BehaviorSubject(null)
+  observedPlayers = new BehaviorSubject(null)
+  observedGameReady = new BehaviorSubject(null)
   //connect to socket on server
    
 
   
 
   constructor(private _http: Http, private _cookie:CookieService, private _router:Router) {
-      this.socket = io(this.url)
-      this.socket.on('game_update', function (data){
-        console.log("game received",data)
-        localStorage.setItem('game',JSON.stringify(data))
-        _router.navigate(['/gameboard'])
-      });
+      this.socket = io(this.url);
+      this.socket.on('update_game', function (response) {
+      this.observedGame.next(response)
+      }.bind(this));
+
+      this.socket.on('new_game', function(response) {
+      console.log('new game',response)
+      this.observedGame.next(response)
+      }.bind(this))
+
+      this.socket.on('player_joined', function(response) {
+        this.observedPlayers.next(response)
+      }.bind(this))
+
+      this.socket.on('show-question', function(question) {
+        console.log('question to show',question)
+        this.observedQuestionView.next(question)
+      }.bind(this))
+
+      this.socket.on('updateBuzzer', function(status) {
+        console.log('updating buzzer, socket.on',status)
+        this.observedBuzzInStatus.next(status)
+      }.bind(this))
+
+      this.socket.on('buzzIn', function(player) {
+        console.log("player buzzed in",player)
+      }.bind(this))
+    
+      this.socket.on('ready', function(status) {
+        this.observedGameReady.next(status)
+      }.bind(this))
+
+      this.socket.on('firstTurn',function(player) {
+        console.log("socket",this.socket.id)
+        console.log("player's turn",player)
+        if (this.socket.id == player) {
+          this.observedTurnStatus.next(true)
+        }
+      }.bind(this))
+        
+      
 
    }
+
+  
 
   updategame(data) {
     this.observedGame.next(data)
   }
 
-  joinGame() {
-    this.socket.emit('player_joined', {userName: "kbible"})
+  joinGame(username) {
+    this.socket.emit('player_joined', {userName: username})
   }
 
-  reroute() {
-    this._router.navigate(["/gameboard"])
+  getGame() {
+    this.socket.emit('get_game')
   }
-
-//   categories(game) {
-//   var titleArr =[]
-//   var arr=[]
-//   var dict = {}
-//   for (var i of game) {
-//     if (!dict[i.category.title]) {
-//       titleArr.push(i.category.title)
-//       dict[i.category.title] = []
-//       dict[i.category.title].push(i)
-//     }
-//     else {
-//       dict[i.category.title].push(i)
-//     }
-//   }
-//   for (var j of titleArr) {
-//     arr.push({name: j,questions:dict[j]})
-//   }
-//   console.log(arr)
-//   return arr
-// }
-
 
 //gets a random game, takes the airdate, and grabs all categories and questions from that airdate
   startNewGame() {
@@ -69,8 +92,29 @@ export class ConnectionService {
     this.socket.emit('new_game')
   }
 
+  displayQuestion(question) {
+    this.socket.emit('display-question',question)
+  }
+
   disconnect() {
     this.socket.disconnect()
+  }
+
+  ngOnDestroy() {
+    localStorage.clear()
+  }
+
+  updateSocketGame(game) {
+    this.socket.emit('update_game',game)
+  }
+
+  buzzIn() {
+    console.log('buzzing in')
+    this.socket.emit('player_buzzed_in')
+  }
+
+  trebekready() {
+    this.socket.emit('trebekready')
   }
 
 }
