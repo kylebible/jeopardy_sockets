@@ -13,6 +13,7 @@ export class PhoneboardComponent implements OnInit {
   buzzermode = false;
   myTurn = false;
   ready = false;
+  buzzedInPlayer = ""
 
   constructor(private _router:Router, private _connection:ConnectionService) {
     _connection.observedGame.subscribe(
@@ -32,6 +33,10 @@ export class PhoneboardComponent implements OnInit {
     _connection.observedTurnStatus.subscribe(
       (currentTurnStatus) => {this.myTurn = currentTurnStatus},
       (err)=>console.log(err)
+    )
+
+    _connection.observedBuzzedInPlayer.subscribe(
+      (currentlyBuzzedIn) => {if(currentlyBuzzedIn) {this.buzzedInPlayer = currentlyBuzzedIn}}
     )
    }
 

@@ -1,6 +1,6 @@
 <div *ngIf="ready">
     <div *ngIf="game">
-      <div *ngIf="myTurn && !buzzermode">
+      <div *ngIf="myTurn && !buzzermode && buzzedInPlayer.length<1">
       <div *ngIf="questions.length<1"> 
         <div *ngFor="let category of game">
           <button type="buton" class="btn btn-primary col-12" (click)="choose(category)">{{category.name}}</button><br>
@@ -23,6 +23,9 @@
 <div *ngIf="buzzermode" id="container" class="row">
   <button type="button" class="buzzer btn btn-primary" (click)="buzzin()">Buzz In!</button>
 </div>
-<div *ngIf="!myTurn && ready">
+<div *ngIf="!myTurn && ready && buzzedInPlayer.length<1">
   <h1 class="question text-center">Not your turn!</h1>
+</div>
+<div *ngIf="buzzedInPlayer.length>0">
+  <h1 class="question text-center">{{buzzedInPlayer}} Buzzed In!</h1>
 </div>

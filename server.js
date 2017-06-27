@@ -48,7 +48,7 @@ io.sockets.on('connection', function (socket) {
     trebekready = true
     if (Object.keys(players).length >= 2 && trebekready) {
         io.emit('ready', true)
-        io.emit('firstTurn',Object.keys(players)[0])
+        io.emit('firstTurn',players[Object.keys(players)[0]])
       }
   })
 
@@ -93,6 +93,7 @@ io.sockets.on('connection', function (socket) {
   })
 
   socket.on('disconnect',function() {
+    console.log('disconnection',socket.id)
     if (players[socket.id] != null) {
       io.emit('playerLeft',players[socket.id])
       delete players[socket.id]
@@ -102,7 +103,7 @@ io.sockets.on('connection', function (socket) {
       }
 
       if (Object.keys(players).length < 2) {
-        io.sockets.emit('ready', false)
+        io.emit('ready', false)
       }
     }
 
@@ -111,6 +112,15 @@ io.sockets.on('connection', function (socket) {
   socket.on('player_buzzed_in', function() {
       console.log("buzzed in")
       io.emit('buzzIn',players[socket.id])
+      io.emit('updateBuzzer',false)
+    })
+
+    socket.on('resetServer', function() {
+      console.log('server resetting')
+      players={}
+      game = []
+      trebekready = false
+      io.emit('resetServer')
     })
 
 

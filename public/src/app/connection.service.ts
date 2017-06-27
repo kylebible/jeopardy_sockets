@@ -5,13 +5,14 @@ import * as io from 'socket.io-client';
 import { Http } from "@angular/http";
 import { CookieService } from "angular2-cookie/services/cookies.service";
 import { Router } from "@angular/router";
+import 'rxjs'
 declare var process:any
 
 @Injectable()
 export class ConnectionService implements OnDestroy {
   port = 8000
-  // private url = 'http://localhost:' + this.port; 
-  private url = 'https://jeopardysockets.herokuapp.com';
+  private url = 'http://localhost:' + this.port; 
+  // private url = 'https://jeopardysockets.herokuapp.com';
   socket;
   socketSubscription = new BehaviorSubject(null)
   observedData = new BehaviorSubject(null)
@@ -22,8 +23,8 @@ export class ConnectionService implements OnDestroy {
   observedTurnStatus = new BehaviorSubject(null)
   observedPlayers = new BehaviorSubject(null)
   observedGameReady = new BehaviorSubject(null)
-  //connect to socket on server
-   
+  observedBuzzedInPlayer = new BehaviorSubject(null)
+  observedPlayersTurn = new BehaviorSubject(null)
 
   
 
@@ -53,7 +54,11 @@ export class ConnectionService implements OnDestroy {
       }.bind(this))
 
       this.socket.on('buzzIn', function(player) {
-        console.log("player buzzed in",player)
+        console.log('buzzed in player',player)
+        if (player.id == this.socket.id) {
+          this.observedBuzzedInPlayer.next("You")
+        }
+        else {this.observedBuzzedInPlayer.next(player.userName)}
       }.bind(this))
     
       this.socket.on('ready', function(status) {
@@ -63,9 +68,16 @@ export class ConnectionService implements OnDestroy {
       this.socket.on('firstTurn',function(player) {
         console.log("socket",this.socket.id)
         console.log("player's turn",player)
-        if (this.socket.id == player) {
+        if (this.socket.id == player.id) {
           this.observedTurnStatus.next(true)
         }
+        console.log(player)
+        this.observedPlayersTurn.next(player.userName)
+      }.bind(this))
+
+      this.socket.on('resetServer',function() {
+        console.log("in socket")
+        window.location.replace('/')
       }.bind(this))
         
       
@@ -115,6 +127,11 @@ export class ConnectionService implements OnDestroy {
 
   trebekready() {
     this.socket.emit('trebekready')
+  }
+  
+  resetServer() {
+    console.log('resetting')
+    this.socket.emit('resetServer')
   }
 
 }
