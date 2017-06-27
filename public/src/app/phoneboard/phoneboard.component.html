@@ -23,7 +23,7 @@
 <div *ngIf="buzzermode && canAnswer" id="container" class="row">
   <button type="button" class="buzzer btn btn-primary" (click)="buzzin()">Buzz In!</button>
 </div>
-<div *ngIf="!myTurn && ready && buzzedInPlayer.length<1 && canAnswer">
+<div *ngIf="!myTurn && ready && !buzzermode && canAnswer">
   <h1 class="question text-center">Not your turn!</h1>
 </div>
 <div *ngIf="!canAnswer && buzzedInPlayer.length<1">
