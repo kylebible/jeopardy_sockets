@@ -72,7 +72,7 @@ export class GameboardComponent implements OnInit {
         console.log(self)
         self.removeAnswer()
         self._connection.resetEligiblePlayers()
-     },5000)
+     },2000)
    }
 
 

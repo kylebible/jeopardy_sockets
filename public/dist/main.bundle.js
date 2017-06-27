@@ -345,7 +345,8 @@ var ConnectionService = (function () {
         this._cookie = _cookie;
         this._router = _router;
         this.port = 8000;
-        this.url = 'http://localhost:' + this.port;
+        // private url = 'http://localhost:' + this.port; 
+        this.url = 'https://jeopardysockets.herokuapp.com';
         this.socketSubscription = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedData = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedGame = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
@@ -401,13 +402,15 @@ var ConnectionService = (function () {
             this.observedPlayersTurn.next(player.userName);
         }.bind(this));
         this.socket.on('correct-Answer', function (player) {
-            if (this.socket.id == player) {
+            if (this.socket.id == player.id) {
                 this.observedTurnStatus.next(true);
             }
             else {
                 this.observedTurnStatus.next(false);
             }
             console.log('after server correct answer');
+            console.log("player's turn", player);
+            this.observedPlayersTurn.next(player.userName);
             this.observedBuzzedInPlayer.next("");
             this.buzzedinplayer = null;
             this.observedQuestionView.next(null);
@@ -480,7 +483,7 @@ var ConnectionService = (function () {
     };
     ConnectionService.prototype.playerCorrect = function () {
         console.log('emitting playercorrect to server');
-        this.socket.emit('correctAnswer', this.buzzedinplayer["id"]);
+        this.socket.emit('correctAnswer', this.buzzedinplayer);
         this.resetEligiblePlayers();
     };
     ConnectionService.prototype.playerIncorrect = function () {
@@ -614,7 +617,7 @@ var GameboardComponent = (function () {
             console.log(self);
             self.removeAnswer();
             self._connection.resetEligiblePlayers();
-        }, 5000);
+        }, 2000);
     };
     GameboardComponent.prototype.ngOnInit = function () {
     };
@@ -806,7 +809,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/phoneboard/phoneboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !buzzermode && buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <div *ngFor=\"let question of questions\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question)\"><span *ngIf=\"!question.asked\">{{question.value | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"buzzermode && canAnswer\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n<div *ngIf=\"!myTurn && ready && !buzzermode && canAnswer\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"!canAnswer && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">You've already buzzed in!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>\n  <p>buzzer mode: {{buzzermode}}</p>\n  <p>my turn: {{myTurn}}</p>\n  <p>ready: {{ready}} </p>\n  <p>buzzed in player: {{buzzedInPlayer}} </p>\n  <p>can answer?: {{canAnswer}} </p>"
+module.exports = "<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !buzzermode && buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <div *ngFor=\"let question of questions\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question)\"><span *ngIf=\"!question.asked\">{{question.value | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"buzzermode && canAnswer\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n<div *ngIf=\"!myTurn && ready && !buzzermode && canAnswer\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"!canAnswer && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">You've already buzzed in!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>\n  <!--<p>buzzer mode: {{buzzermode}}</p>\n  <p>my turn: {{myTurn}}</p>\n  <p>ready: {{ready}} </p>\n  <p>buzzed in player: {{buzzedInPlayer}} </p>\n  <p>can answer?: {{canAnswer}} </p>-->"
 
 /***/ }),
 

@@ -47,7 +47,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('trebekready', function() {
     console.log('trebekready)')
     trebekready = true
-    eligiblePlayers = players
+    eligiblePlayers = JSON.parse(JSON.stringify(players))
     if (Object.keys(players).length >= 2 && trebekready) {
         io.emit('ready', true)
         io.emit('firstTurn',players[Object.keys(players)[0]])
@@ -112,7 +112,7 @@ io.sockets.on('connection', function (socket) {
   })
 
   socket.on('player_buzzed_in', function() {
-      console.log("buzzed in")
+      console.log("buzzed in!!",players,socket.id)
       io.emit('buzzIn',players[socket.id])
       io.emit('updateBuzzer',false)
     })
@@ -127,11 +127,12 @@ io.sockets.on('connection', function (socket) {
     })
 
     socket.on('correctAnswer', function(player) {
+      eligiblePlayers = JSON.parse(JSON.stringify(players))
       io.emit('correct-Answer',player)
     })
 
     socket.on('resetEligiblePlayers',function() {
-      eligibilePlayers = players
+      eligiblePlayers = JSON.parse(JSON.stringify(players))
       console.log('eligible players',eligiblePlayers)
       io.emit('eligibilePlayers',players)
     })

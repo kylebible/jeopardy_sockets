@@ -11,8 +11,8 @@ declare var process:any
 @Injectable()
 export class ConnectionService implements OnDestroy {
   port = 8000
-  private url = 'http://localhost:' + this.port; 
-  // private url = 'https://jeopardysockets.herokuapp.com';
+  // private url = 'http://localhost:' + this.port; 
+  private url = 'https://jeopardysockets.herokuapp.com';
   socket;
   socketSubscription = new BehaviorSubject(null)
   observedData = new BehaviorSubject(null)
@@ -79,13 +79,15 @@ export class ConnectionService implements OnDestroy {
       }.bind(this))
 
       this.socket.on('correct-Answer', function(player) {
-        if (this.socket.id == player) {
+        if (this.socket.id == player.id) {
           this.observedTurnStatus.next(true)
         }
         else {
           this.observedTurnStatus.next(false)
         }
         console.log('after server correct answer')
+        console.log("player's turn",player)
+        this.observedPlayersTurn.next(player.userName)
         this.observedBuzzedInPlayer.next("")
         this.buzzedinplayer = null
         this.observedQuestionView.next(null)
@@ -181,7 +183,7 @@ export class ConnectionService implements OnDestroy {
 
   playerCorrect() {
     console.log('emitting playercorrect to server')
-    this.socket.emit('correctAnswer',this.buzzedinplayer["id"])
+    this.socket.emit('correctAnswer',this.buzzedinplayer)
     this.resetEligiblePlayers()
   }
 
