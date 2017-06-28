@@ -365,11 +365,19 @@ var ConnectionService = (function () {
             this.observedGame.next(response);
         }.bind(this));
         this.socket.on('new_game', function (response) {
+            for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
+                var i = response_1[_i];
+                for (var _a = 0, _b = i["questions"]; _a < _b.length; _a++) {
+                    var j = _b[_a];
+                    console.log(i["name"], j["value"]);
+                }
+            }
             console.log('new game', response);
             this.observedGame.next(response);
         }.bind(this));
         this.socket.on('player_joined', function (response) {
             this.observedPlayers.next(response);
+            console.log(this.observedPlayers.value);
         }.bind(this));
         this.socket.on('show-question', function (question) {
             console.log('question to show', question);
@@ -408,6 +416,9 @@ var ConnectionService = (function () {
             else {
                 this.observedTurnStatus.next(false);
             }
+            // console.log(this.observedQuestionView.value['value'])
+            // console.log(this.observedPlayers.value[player.id]["score"])
+            // this.observedPlayers.value[player.id]["score"] += this.observedQuestionView.value['value']
             console.log('after server correct answer');
             console.log("player's turn", player);
             this.observedPlayersTurn.next(player.userName);
@@ -446,6 +457,9 @@ var ConnectionService = (function () {
     }
     ConnectionService.prototype.updategame = function (data) {
         this.observedGame.next(data);
+    };
+    ConnectionService.prototype.updateScores = function (players) {
+        this.socket.emit('updateScores', players);
     };
     ConnectionService.prototype.joinGame = function (username) {
         this.socket.emit('player_joined', { userName: username });
@@ -809,7 +823,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/phoneboard/phoneboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !buzzermode && buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <div *ngFor=\"let question of questions\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question)\"><span *ngIf=\"!question.asked\">{{question.value | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"buzzermode && canAnswer\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n<div *ngIf=\"!myTurn && ready && !buzzermode && canAnswer\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"!canAnswer && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">You've already buzzed in!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>\n  <!--<p>buzzer mode: {{buzzermode}}</p>\n  <p>my turn: {{myTurn}}</p>\n  <p>ready: {{ready}} </p>\n  <p>buzzed in player: {{buzzedInPlayer}} </p>\n  <p>can answer?: {{canAnswer}} </p>-->"
+module.exports = "<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !buzzermode && buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <div *ngFor=\"let question of questions; let i = index\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question,(i+1)*100)\"><span *ngIf=\"!question.asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"buzzermode && canAnswer\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n<div *ngIf=\"!myTurn && ready && !buzzermode && canAnswer\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"!canAnswer && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">You've already buzzed in!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>\n  <!--<p>buzzer mode: {{buzzermode}}</p>\n  <p>my turn: {{myTurn}}</p>\n  <p>ready: {{ready}} </p>\n  <p>buzzed in player: {{buzzedInPlayer}} </p>\n  <p>can answer?: {{canAnswer}} </p>-->"
 
 /***/ }),
 
@@ -865,7 +879,8 @@ var PhoneboardComponent = (function () {
     PhoneboardComponent.prototype.choose = function (category) {
         this.questions = category.questions;
     };
-    PhoneboardComponent.prototype.valueChosen = function (question) {
+    PhoneboardComponent.prototype.valueChosen = function (question, value) {
+        question["value"] = value;
         this._connection.displayQuestion(question);
         this.questions = [];
         this._connection.observedBuzzInStatus.next(true);

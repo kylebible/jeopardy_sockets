@@ -7,8 +7,8 @@
         </div>
       </div>
       <div *ngIf="questions.length>0">
-        <div *ngFor="let question of questions">
-          <button type="buton" class="btn btn-primary col-12" (click)="valueChosen(question)"><span *ngIf="!question.asked">{{question.value | currency:'USD':true:'3.0-0'}}</span><span *ngIf="question.asked">Question Asked!</span></button><br>
+        <div *ngFor="let question of questions; let i = index">
+          <button type="buton" class="btn btn-primary col-12" (click)="valueChosen(question,(i+1)*100)"><span *ngIf="!question.asked">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span><span *ngIf="question.asked">Question Asked!</span></button><br>
         </div>
       </div>
       </div>

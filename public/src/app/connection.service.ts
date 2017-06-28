@@ -37,12 +37,18 @@ export class ConnectionService implements OnDestroy {
       }.bind(this));
 
       this.socket.on('new_game', function(response) {
+      for (var i of response) {
+        for (var j of i["questions"]) {
+          console.log(i["name"],j["value"])
+        }
+      }
       console.log('new game',response)
       this.observedGame.next(response)
       }.bind(this))
 
       this.socket.on('player_joined', function(response) {
         this.observedPlayers.next(response)
+        console.log(this.observedPlayers.value)
       }.bind(this))
 
       this.socket.on('show-question', function(question) {
@@ -85,6 +91,9 @@ export class ConnectionService implements OnDestroy {
         else {
           this.observedTurnStatus.next(false)
         }
+        // console.log(this.observedQuestionView.value['value'])
+        // console.log(this.observedPlayers.value[player.id]["score"])
+        // this.observedPlayers.value[player.id]["score"] += this.observedQuestionView.value['value']
         console.log('after server correct answer')
         console.log("player's turn",player)
         this.observedPlayersTurn.next(player.userName)
@@ -135,6 +144,10 @@ export class ConnectionService implements OnDestroy {
 
   updategame(data) {
     this.observedGame.next(data)
+  }
+
+  updateScores(players) {
+    this.socket.emit('updateScores',players)
   }
 
   joinGame(username) {

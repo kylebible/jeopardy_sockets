@@ -33,6 +33,7 @@ io.sockets.on('connection', function (socket) {
     console.log('player_joined')
     players[socket.id] = player;
     players[socket.id].id = socket.id
+    players[socket.id].score = 0
     console.log("Player " + player.userName + " with id: " + socket.id + " has joined.");
     for (var key in players) {
             console.log("Players: " + key + " : " + players[key].userName);
@@ -153,6 +154,9 @@ function categories(found_game) {
   var arr=[]
   var dict = {}
   for (var i of found_game) {
+    if (i.invalid>0) {
+      i["asked"] = true
+    }
     if (!dict[i.category.title]) {
       titleArr.push(i.category.title)
       dict[i.category.title] = []
@@ -169,5 +173,10 @@ function categories(found_game) {
   for (var j of titleArr) {
     arr.push({name: j,questions:dict[j]})
   }
+  // for (var k of arr) {
+  //   k.questions.sort(function(a,b) {
+  //     return a.value > b.value
+  //   })
+  // }
   return arr
 }

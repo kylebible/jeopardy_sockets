@@ -56,7 +56,8 @@ export class PhoneboardComponent implements OnInit {
      this.questions = category.questions
   }
 
-  valueChosen(question) {
+  valueChosen(question,value) {
+    question["value"] = value
     this._connection.displayQuestion(question)
     this.questions = []
     this._connection.observedBuzzInStatus.next(true)
