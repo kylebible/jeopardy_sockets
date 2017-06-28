@@ -15,6 +15,8 @@ export class GameboardComponent implements OnInit {
   game = []
   arr = [0,1,2,3,4]
   buzzedInPlayer = ""
+  players;
+  playersArr = []
 
   constructor(private _connection:ConnectionService, private  _cookie:CookieService) {
     _connection.observedGame.subscribe(
@@ -30,6 +32,11 @@ export class GameboardComponent implements OnInit {
 
      _connection.observedBuzzedInPlayer.subscribe(
       (currentlyBuzzedIn) => {console.log('currentlybuzzedin',currentlyBuzzedIn); if(currentlyBuzzedIn) {this.buzzedInPlayer = currentlyBuzzedIn} else {this.buzzedInPlayer = ""} console.log('currentlybuzzedin',currentlyBuzzedIn)}
+    )
+
+    _connection.observedPlayers.subscribe(
+      (currentPlayers) => {if(currentPlayers) {this.players = currentPlayers; this.playersArr=Object.keys(this.players); console.log(this.players)}},
+      (err) => console.log(err)
     )
 
    }

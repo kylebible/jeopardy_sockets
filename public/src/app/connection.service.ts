@@ -11,8 +11,8 @@ declare var process:any
 @Injectable()
 export class ConnectionService implements OnDestroy {
   port = 8000
-  // private url = 'http://localhost:' + this.port; 
-  private url = 'https://jeopardysockets.herokuapp.com';
+  private url = 'http://localhost:' + this.port; 
+  // private url = 'https://jeopardysockets.herokuapp.com';
   socket;
   socketSubscription = new BehaviorSubject(null)
   observedData = new BehaviorSubject(null)
@@ -27,10 +27,18 @@ export class ConnectionService implements OnDestroy {
   observedPlayersTurn = new BehaviorSubject(null)
   observedEligiblePlayers = new BehaviorSubject(null)
   observedAnswerStatus = new BehaviorSubject(null)
+  observedCurrentPlayer = new BehaviorSubject(null)
+  observedTrebekPresence = new BehaviorSubject(null)
   buzzedinplayer: object;
+  question;
   
 
   constructor(private _http: Http, private _cookie:CookieService, private _router:Router) {
+      this.observedQuestionView.subscribe(
+        (currentQuestion) => {this.question = currentQuestion},
+        (err) => console.log(err)
+      )
+
       this.socket = io(this.url);
       this.socket.on('update_game', function (response) {
       this.observedGame.next(response)
@@ -47,6 +55,10 @@ export class ConnectionService implements OnDestroy {
       }.bind(this))
 
       this.socket.on('player_joined', function(response) {
+        console.log(response)
+         var player = response[this.socket.id]
+        console.log("player",player)
+        this.observedCurrentPlayer.next(player)
         this.observedPlayers.next(response)
         console.log(this.observedPlayers.value)
       }.bind(this))
@@ -91,11 +103,13 @@ export class ConnectionService implements OnDestroy {
         else {
           this.observedTurnStatus.next(false)
         }
-        // console.log(this.observedQuestionView.value['value'])
-        // console.log(this.observedPlayers.value[player.id]["score"])
-        // this.observedPlayers.value[player.id]["score"] += this.observedQuestionView.value['value']
-        console.log('after server correct answer')
-        console.log("player's turn",player)
+        console.log("question value: ",this.question,typeof this.question['value'])
+        console.log("player score before: ",this.observedPlayers['value'])
+        // console.log("question value: ",this.observedQuestionView['value']['value'])
+        // console.log("player score before: ",this.observedPlayers)
+        this.observedPlayers["value"][player.id]["score"] += this.question['value']
+        console.log("player score after", this.observedPlayers['value'])
+        this.updateScores(this.observedPlayers.value)
         this.observedPlayersTurn.next(player.userName)
         this.observedBuzzedInPlayer.next("")
         this.buzzedinplayer = null
@@ -128,8 +142,21 @@ export class ConnectionService implements OnDestroy {
         this.buzzedinplayer = null
         
       }.bind(this))
+
+      this.socket.on('updatePlayers',function(updatedPlayers) {
+        this.observedPlayers.next(updatedPlayers)
+        this.observedCurrentPlayer.next(updatedPlayers[this.socket.id])
+      }.bind(this))
+
+      this.socket.on('trebekPresent', function() {
+        this.observedTrebekPresence.next(true)
+      }.bind(this))
         
-      
+      this.socket.on('giveUp', function() {
+        this.observedQuestionView.next(null)
+        this.observedAnswerStatus.next(true)
+        this.observedBuzzInStatus.next(false)
+      }.bind(this))
 
 
       this.socket.on('resetServer',function() {
@@ -206,6 +233,15 @@ export class ConnectionService implements OnDestroy {
   }
 
   resetEligiblePlayers() {
+    this.socket.emit('resetEligiblePlayers')
+  }
+
+  trebekPresent() {
+    this.socket.emit('trebekPresent')
+  }
+
+  giveUp() {
+    this.socket.emit('giveUp')
     this.socket.emit('resetEligiblePlayers')
   }
 

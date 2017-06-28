@@ -13,6 +13,7 @@ export class TrebekviewComponent implements OnInit {
   playerTurn = ""
   buzzedInPlayer = ""
   answer= ""
+  buzzerMode = false
   //this.numberPlayers = Object.keys(this.players).length
 
   //TO DO: make ready? not appear when not enough players
@@ -43,6 +44,12 @@ export class TrebekviewComponent implements OnInit {
     this._connection.observedQuestionView.subscribe(
       (currentQuestion) => {if (currentQuestion){this.answer = currentQuestion.answer} else {this.answer = ""}}
     )
+
+    this._connection.observedBuzzInStatus.subscribe(
+      (currentStatus)=> {if(currentStatus) {this.buzzerMode = currentStatus}},
+      (err)=>console.log(err)
+    )
+
    }
 
   ngOnInit() {
@@ -64,5 +71,9 @@ export class TrebekviewComponent implements OnInit {
 
   incorrect() {
     this._connection.playerIncorrect()
+  }
+
+  giveUp() {
+    this._connection.giveUp()
   }
 }

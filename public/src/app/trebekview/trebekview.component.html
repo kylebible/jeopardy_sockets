@@ -7,6 +7,7 @@
 <div class="container" *ngIf="ready && buzzedInPlayer.length<1">
   <br><h1 class="question text-center" *ngIf="answer.length>1">{{answer}}</h1><br><br>
   <h1 class="question text-center">{{playerTurn}}'s turn</h1>
+  <h1 class="question text-center" (click)="giveUp()" *ngIf="buzzerMode">Give Up?</h1>
 </div>
 <div class="container" *ngIf="ready && buzzedInPlayer.length>0">
   <br><h1 class="question text-center">{{answer}}</h1><br><br>
@@ -14,3 +15,5 @@
   <h1 class="question text-center" (click)="correct()">Correct Answer?</h1>
   <h1 class="question text-center" (click)="incorrect()">Incorrect Answer?</h1>
 </div>
+<!--<p class="question"># players {{numberPlayers}}</p>
+<p class="question">players {{players | json}}</p>-->

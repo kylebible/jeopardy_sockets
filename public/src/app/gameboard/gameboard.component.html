@@ -1,3 +1,6 @@
+<div *ngIf="!text_visible" class="text-center">
+    <h2 class="scores" *ngFor="let key of playersArr">{{players[key].userName}}: {{players[key].score}}</h2>
+</div>
 <table class="board" *ngIf="!text_visible">
   <thead>
       <tr>

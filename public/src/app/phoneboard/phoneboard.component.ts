@@ -15,11 +15,17 @@ export class PhoneboardComponent implements OnInit {
   ready = false;
   buzzedInPlayer = ""
   canAnswer = true;
+  player;
+  question;
 
   constructor(private _router:Router, private _connection:ConnectionService) {
     _connection.observedGame.subscribe(
       (updatedGame) => {this.game = updatedGame},
       (err) => console.log(err)
+    )
+    _connection.observedQuestionView.subscribe(
+      (currentQuestion) => this.question = currentQuestion,
+      (err) =>console.log(err)
     )
     _connection.observedBuzzInStatus.subscribe(
       (currentBuzzerMode) => {this.buzzermode = currentBuzzerMode; console.log("buzzer mode in phone vies",this.buzzermode)},
@@ -46,6 +52,11 @@ export class PhoneboardComponent implements OnInit {
       (err)=> console.log(err)
     )
 
+    _connection.observedCurrentPlayer.subscribe(
+      (currentPlayer) => this.player = currentPlayer,
+      (err)=>console.log(err)
+    )
+
     //TO DO: resolve current answer status when question resets
    }
 
@@ -59,6 +70,7 @@ export class PhoneboardComponent implements OnInit {
   valueChosen(question,value) {
     question["value"] = value
     this._connection.displayQuestion(question)
+    this._connection.observedQuestionView.next(question)
     this.questions = []
     this._connection.observedBuzzInStatus.next(true)
   }

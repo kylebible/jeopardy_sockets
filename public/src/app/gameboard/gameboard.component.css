@@ -27,7 +27,6 @@ th, td {
 
 th {
     width: 100px;
-    height: 120px;
     font-size: medium;
     text-align: center
 }
@@ -36,7 +35,7 @@ td {
     font-size: 2.7em;
     font-weight: bold;
     vertical-align: middle;
-    height: 120px;
+    height: 1%;
     width: 100px;
     border-radius: 10px
 }
@@ -45,6 +44,13 @@ div a {
     color: #FF6;
     text-decoration: none;
     outline: 0; 
+}
+
+.scores {
+    font-family: Korinna;
+    color: white;
+    display: inline-block;
+    margin: 0 20px;
 }
 
 .question {

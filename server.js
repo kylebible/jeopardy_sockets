@@ -27,8 +27,6 @@ var io = require('socket.io').listen(server)
 io.sockets.on('connection', function (socket) {
   
   console.log(socket.id);
-
-  console.log('someone joined the game',game)
   socket.on('player_joined', function(player) {
     console.log('player_joined')
     players[socket.id] = player;
@@ -38,11 +36,12 @@ io.sockets.on('connection', function (socket) {
     for (var key in players) {
             console.log("Players: " + key + " : " + players[key].userName);
         }
-    socket.broadcast.emit('player_joined',players)
-    if (Object.keys(players).length >= 2 && trebekready) {
-        console.log('ready')
-        io.emit('ready', true)
-      }
+    socket.emit('player_joined',players)
+    io.emit('updatePlayers',players)
+  })
+
+  socket.on('trebekPresent', function() {
+    io.emit('trebekPresent')
   })
 
   socket.on('trebekready', function() {
@@ -132,6 +131,10 @@ io.sockets.on('connection', function (socket) {
       io.emit('correct-Answer',player)
     })
 
+    socket.on('giveUp', function() {
+      io.emit('giveUp')
+    })
+
     socket.on('resetEligiblePlayers',function() {
       eligiblePlayers = JSON.parse(JSON.stringify(players))
       console.log('eligible players',eligiblePlayers)
@@ -144,6 +147,11 @@ io.sockets.on('connection', function (socket) {
       delete eligiblePlayers[player]
       console.log('player incorrect',eligiblePlayers)
       io.emit('playerIncorrect',eligiblePlayers)
+    })
+
+    socket.on('updateScores', function(updatedPlayers) {
+      players = updatedPlayers
+      io.emit('updatePlayers',players)
     })
 
 

@@ -1,3 +1,6 @@
+<div *ngIf="!buzzermode && player">
+  <h1 class="question text-center">Score: {{player.score}}</h1>
+</div>
 <div *ngIf="ready">
     <div *ngIf="game">
       <div *ngIf="myTurn && !buzzermode && buzzedInPlayer.length<1">
@@ -32,7 +35,10 @@
 <div *ngIf="buzzedInPlayer.length>0">
   <h1 class="question text-center">{{buzzedInPlayer}} Buzzed In!</h1>
 </div>
-  <!--<p>buzzer mode: {{buzzermode}}</p>
+
+  <!--<p>current score: {{player.score}}</p>
+  <p>current question: {{question | json}}
+  <p>buzzer mode: {{buzzermode}}</p>
   <p>my turn: {{myTurn}}</p>
   <p>ready: {{ready}} </p>
   <p>buzzed in player: {{buzzedInPlayer}} </p>
