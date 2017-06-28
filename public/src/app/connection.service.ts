@@ -11,8 +11,8 @@ declare var process:any
 @Injectable()
 export class ConnectionService implements OnDestroy {
   port = 8000
-  private url = 'http://localhost:' + this.port; 
-  // private url = 'https://jeopardysockets.herokuapp.com';
+  // private url = 'http://localhost:' + this.port; 
+  private url = 'https://jeopardysockets.herokuapp.com';
   socket;
   socketSubscription = new BehaviorSubject(null)
   observedData = new BehaviorSubject(null)
