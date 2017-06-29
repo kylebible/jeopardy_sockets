@@ -1,19 +1,11 @@
+<div class="centered">
 <div *ngIf="!buzzermode && player">
   <h1 class="question text-center">Score: {{player.score}}</h1>
 </div>
 <div *ngIf="ready">
     <div *ngIf="game">
       <div *ngIf="myTurn && !buzzermode && buzzedInPlayer.length<1">
-      <div *ngIf="questions.length<1"> 
-        <div *ngFor="let category of game">
-          <button type="buton" class="btn btn-primary col-12" (click)="choose(category)">{{category.name}}</button><br>
-        </div>
-      </div>
-      <div *ngIf="questions.length>0">
-        <div *ngFor="let question of questions; let i = index">
-          <button type="buton" class="btn btn-primary col-12" (click)="valueChosen(question,(i+1)*100)"><span *ngIf="!question.asked">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span><span *ngIf="question.asked">Question Asked!</span></button><br>
-        </div>
-      </div>
+        <h1 class="question text-center">Pick a Clue!</h1>
       </div>
     </div>
 <div *ngIf="!game">
@@ -22,9 +14,6 @@
 </div>
 <div *ngIf="!ready">
   <h1 class="question text-center">Waiting for other Players!</h1>
-</div>
-<div *ngIf="buzzermode && canAnswer" id="container" class="row">
-  <button type="button" class="buzzer btn btn-primary" (click)="buzzin()">Buzz In!</button>
 </div>
 <div *ngIf="!myTurn && ready && !buzzermode && canAnswer">
   <h1 class="question text-center">Not your turn!</h1>
@@ -35,7 +24,10 @@
 <div *ngIf="buzzedInPlayer.length>0">
   <h1 class="question text-center">{{buzzedInPlayer}} Buzzed In!</h1>
 </div>
-
+</div>
+<div *ngIf="buzzermode && canAnswer" id="container" class="row">
+  <button type="button" class="buzzer btn btn-primary" (click)="buzzin()">Buzz In!</button>
+</div>
   <!--<p>current score: {{player.score}}</p>
   <p>current question: {{question | json}}
   <p>buzzer mode: {{buzzermode}}</p>

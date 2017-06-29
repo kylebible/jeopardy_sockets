@@ -11,6 +11,12 @@
     font-weight: bold;
 }
 
+@font-face {
+    font-family: Gameboard;
+    src: url(./assets/Swiss911BT-Compressed.otf);
+    font-weight: bold;
+}
+
 * {
     font-family: Korinna;
 }
@@ -21,4 +27,5 @@ body {
 
 html, body {
     height:100%;
+    width: 100%;
 }

@@ -1,19 +1,20 @@
 <div *ngIf="!text_visible" class="text-center">
-    <h2 class="scores" *ngFor="let key of playersArr">{{players[key].userName}}: {{players[key].score}}</h2>
+    <h2 class="scores" *ngFor="let key of playersArr">{{players[key].userName}}: {{players[key].score | currency:'USD':true:'1.0-0'}}</h2>
 </div>
+<div class="overflow">
 <table class="board" *ngIf="!text_visible">
   <thead>
       <tr>
-          <th *ngFor="let category of game"><span>{{category.name | capitalize}}</span>&nbsp;</th>
+          <th *ngFor="let category of game"><span>{{category.name | uppercase}}</span>&nbsp;</th>
       </tr>
     </thead>
     <tbody>
         <tr *ngFor="let i of arr">
             <td *ngFor="let category of game" (click)="show(category.questions[i])"><span *ngIf="!category.questions[i].asked">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span></td>
-        </tr>
     </tbody>
 </table>
-<div *ngIf="text_visible" style="vertical-align: middle" (click)="question_clicked()">
+</div>
+<div *ngIf="text_visible" (click)="question_clicked()">
     <h2 *ngIf="buzzedInPlayer" class="buzzedin">{{buzzedInPlayer}} buzzed in!</h2>
     <h1 class="question">{{text | uppercase}}</h1>
 </div>

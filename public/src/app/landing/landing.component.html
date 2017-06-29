@@ -1,6 +1,6 @@
-<div class="container text-center">
+<div class="container centered text-center">
   <h1>Jeoparty</h1>
   <a href="javascript:void(0);" class="question option" (click)="getGame()" *ngIf="!game">Start a new game</a><br>
-  <a href="javascript:void(0);" class="question option" [routerLink]='["/username"]' *ngIf="game && numberPlayers<=3">Join a game</a><br>
+  <a href="javascript:void(0);" class="question option" [routerLink]='["/username"]' *ngIf="game && numberPlayers<=3">Join game</a><br>
   <a href="javascript:void(0);" class="question option" [routerLink]='["/trebekview"]'*ngIf="game && !trebekPresence" (click)="trebekPresent()" >Be Alex Trebek</a>
 </div>

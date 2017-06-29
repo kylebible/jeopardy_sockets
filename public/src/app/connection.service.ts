@@ -11,8 +11,8 @@ declare var process:any
 @Injectable()
 export class ConnectionService implements OnDestroy {
   port = 8000
-  // private url = 'http://localhost:' + this.port; 
-  private url = 'https://jeopardysockets.herokuapp.com';
+  private url = 'http://localhost:' + this.port; 
+  // private url = 'https://jeopardysockets.herokuapp.com';
   socket;
   socketSubscription = new BehaviorSubject(null)
   observedData = new BehaviorSubject(null)
@@ -33,6 +33,9 @@ export class ConnectionService implements OnDestroy {
   question;
   
 
+  //todo on connect give new player game info
+
+
   constructor(private _http: Http, private _cookie:CookieService, private _router:Router) {
       this.observedQuestionView.subscribe(
         (currentQuestion) => {this.question = currentQuestion},
@@ -42,7 +45,12 @@ export class ConnectionService implements OnDestroy {
       this.socket = io(this.url);
       this.socket.on('update_game', function (response) {
       this.observedGame.next(response)
-      }.bind(this));
+    }.bind(this));
+    
+      this.socket.on('syncGame',function(game) {
+        this.observedGame.next(game.game)
+        this.observedPlayers.next(game.players)
+      }.bind(this))
 
       this.socket.on('new_game', function(response) {
       for (var i of response) {
@@ -112,6 +120,7 @@ export class ConnectionService implements OnDestroy {
         this.updateScores(this.observedPlayers.value)
         this.observedPlayersTurn.next(player.userName)
         this.observedBuzzedInPlayer.next("")
+        this.observedBuzzInStatus.next(false)
         this.buzzedinplayer = null
         this.observedQuestionView.next(null)
         this.observedAnswerStatus.next(true)
@@ -123,7 +132,11 @@ export class ConnectionService implements OnDestroy {
       }.bind(this))
 
       this.socket.on('playerIncorrect', function(players) {
-        console.log("incorrect answer. Playser Left: ",players)
+        console.log("incorrect players",this.observedPlayers["value"])
+        console.log("incorrect player",this.buzzedinplayer)
+        this.observedPlayers["value"][this.buzzedinplayer["id"]]["score"] -= this.question['value']
+        // console.log(this.observedPlayers["value"][this.buzzedinplayer["id"]]["score"])
+        console.log("incorrect answer. Players Left: ",players)
         if (Object.keys(players).length<1) {
           console.log("no players left")
           this.observedQuestionView.next(null)

@@ -33,7 +33,7 @@ export class PhoneboardComponent implements OnInit {
     )
 
     _connection.observedGameReady.subscribe( 
-      (currentReadiness) => {this.ready = currentReadiness},
+      (currentReadiness) => {if (currentReadiness !=null) {this.ready = currentReadiness}},
       (err)=> console.log(err)
     )
 

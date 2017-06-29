@@ -2,14 +2,25 @@ h1 {
     font-family: Jeopardy;
     color: white;
     font-size: 10vw;
+    margin-top: 10%;
+    text-shadow: 1px 3px 5px black;
 }
 
 .question {
     font-family: Korinna;
     color: white;
+    text-shadow: 1px 3px 5px black;
 }
 
 .option {
     font-size: 5vw;
     text-decoration: none;
+}
+
+.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
 }

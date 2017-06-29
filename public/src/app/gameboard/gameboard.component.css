@@ -1,5 +1,5 @@
 *{
-    font-family: Arial, Helvetica, sans-serif
+    font-family: Gameboard
 }
 
 table.board {
@@ -8,7 +8,8 @@ table.board {
   height: 100%;
   text-align: center;
   border-spacing: 2px;
-  border-color: gray;
+  border-color: black;
+  table-layout: fixed
 }
   
 tr {
@@ -16,28 +17,31 @@ display: table-row;
 border-color: inherit;
 }
 
+.overflow {
+    height: 100%
+}
+
 th, td {
-    padding: 10px;
     background-color: blue;
     border: 1px outset blue;
     color: rgb(255, 194, 102);
-    padding: 1px;
     vertical-align: middle;
+    text-shadow: 2px 4px 2px black;
+    empty-cells: show;
 }
 
 th {
-    width: 100px;
-    font-size: medium;
+    width: 16.66667%;
+    font-size: 2vw;
+    color: white;
     text-align: center
 }
 
 td {
-    font-size: 2.7em;
+    font-size: 5vmax;
     font-weight: bold;
     vertical-align: middle;
-    height: 1%;
-    width: 100px;
-    border-radius: 10px
+    width: 16.66667%;
 }
 
 div a {
@@ -47,25 +51,28 @@ div a {
 }
 
 .scores {
-    font-family: Korinna;
+    font-family: Gameboard;
     color: white;
+    text-shadow: 1px 3px 5px black;
     display: inline-block;
     margin: 0 20px;
 }
 
 .question {
-    position: absolute;
-    top: 25%;
-    left: 0;
-    right: 0;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100%;
     font-family: Korinna;
     color: white;
     font-size: 7vw;
+    font-size: 11vh;
     vertical-align: middle;
     text-align: center;
     padding: 2vw;
     text-shadow: 1px 3px 5px black;
     font-weight: bold;
+    transform: translate(-50%, -50%);
 }
 
 .buzzedin {
@@ -74,4 +81,12 @@ div a {
     font-size: 5vw;
     text-align: center;
     margin-top: 10%
+}
+
+.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  /* bring your own prefixes */
+  transform: translate(-50%, -50%);
 }

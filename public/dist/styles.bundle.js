@@ -7,6 +7,13 @@ module.exports = __webpack_require__.p + "Korinna.e2f3fafa39e66f22f068.ttf";
 
 /***/ }),
 
+/***/ "../../../../../src/assets/Swiss911BT-Compressed.otf":
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__.p + "Swiss911BT-Compressed.6a891befed317fa85014.otf";
+
+/***/ }),
+
 /***/ "../../../../../src/assets/gyparody.heavy.ttf":
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -49,7 +56,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "/* You can add global styles to this file, and also import other style files */\n@font-face {\n    font-family: Korinna;\n    src: url(" + __webpack_require__("../../../../../src/assets/Korinna.ttf") + ");\n    font-weight: bold;\n}\n\n@font-face {\n    font-family: Jeopardy;\n    src: url(" + __webpack_require__("../../../../../src/assets/gyparody.heavy.ttf") + ");\n    font-weight: bold;\n}\n\n* {\n    font-family: Korinna;\n}\n\nbody {\n    background-color: #070CEC\n}\n\nhtml, body {\n    height:100%;\n}", ""]);
+exports.push([module.i, "/* You can add global styles to this file, and also import other style files */\n@font-face {\n    font-family: Korinna;\n    src: url(" + __webpack_require__("../../../../../src/assets/Korinna.ttf") + ");\n    font-weight: bold;\n}\n\n@font-face {\n    font-family: Jeopardy;\n    src: url(" + __webpack_require__("../../../../../src/assets/gyparody.heavy.ttf") + ");\n    font-weight: bold;\n}\n\n@font-face {\n    font-family: Gameboard;\n    src: url(" + __webpack_require__("../../../../../src/assets/Swiss911BT-Compressed.otf") + ");\n    font-weight: bold;\n}\n\n* {\n    font-family: Korinna;\n}\n\nbody {\n    background-color: #070CEC\n}\n\nhtml, body {\n    height:100%;\n    width: 100%;\n}", ""]);
 
 // exports
 

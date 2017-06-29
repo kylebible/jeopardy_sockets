@@ -19,13 +19,27 @@ var server = app.listen(port, function() {
 
 var players = {}
 var game = [];
+var ready = false
 var trebekready = false;
+var trebekPresent = false;
 var eligiblePlayers = {}
 
 var io = require('socket.io').listen(server)
 
 io.sockets.on('connection', function (socket) {
   
+    if (players[socket.id]== undefined && game.length >1) {
+      console.log('syncing new player')
+      socket.emit('syncGame',{game: game, players: players})
+      if (trebekPresent) {
+        socket.emit('trebekPresent')
+      }
+      if (ready) {
+        socket.emit('ready', true)
+      }
+    }
+
+
   console.log(socket.id);
   socket.on('player_joined', function(player) {
     console.log('player_joined')
@@ -41,6 +55,7 @@ io.sockets.on('connection', function (socket) {
   })
 
   socket.on('trebekPresent', function() {
+    trebekPresent = true
     io.emit('trebekPresent')
   })
 
@@ -50,6 +65,7 @@ io.sockets.on('connection', function (socket) {
     eligiblePlayers = JSON.parse(JSON.stringify(players))
     if (Object.keys(players).length >= 2 && trebekready) {
         io.emit('ready', true)
+        ready = true
         io.emit('firstTurn',players[Object.keys(players)[0]])
       }
   })
@@ -122,6 +138,7 @@ io.sockets.on('connection', function (socket) {
       players={}
       game = []
       trebekready = false
+      trebekPresent = false
       eligiblePlayers = {}
       io.emit('resetServer')
     })
@@ -161,9 +178,20 @@ function categories(found_game) {
   var titleArr =[]
   var arr=[]
   var dict = {}
-  for (var i of found_game) {
+  var doubleJeopardyQs = {}
+  while (Object.keys(doubleJeopardyQs).length < 2) {
+    var idx = Math.floor(Math.random()*60)
+    if (!doubleJeopardyQs[idx]) {
+      doubleJeopardyQs[idx] = true
+    }
+  }
+  for (var [index, i] of found_game.entries()) {
     if (i.invalid>0) {
       i["asked"] = true
+    }
+    if (index in doubleJeopardyQs) {
+      i["doubleJeopardy"] = true
+      console.log(i)
     }
     if (!dict[i.category.title]) {
       titleArr.push(i.category.title)

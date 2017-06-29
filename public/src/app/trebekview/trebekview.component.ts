@@ -8,6 +8,8 @@ import { ConnectionService } from "app/connection.service";
 })
 export class TrebekviewComponent implements OnInit {
   players = {}
+  game = []
+  questions = []
   numberPlayers = 0
   ready = false
   playerTurn = ""
@@ -19,6 +21,12 @@ export class TrebekviewComponent implements OnInit {
   //TO DO: make ready? not appear when not enough players
 
   constructor(private _connection:ConnectionService) {
+
+    _connection.observedGame.subscribe(
+      (updatedGame) => {this.game = updatedGame},
+      (err) => console.log(err)
+    )
+
     this._connection.observedPlayers.subscribe(
       (currentPlayers)=> {
         this.players = currentPlayers;
@@ -46,13 +54,28 @@ export class TrebekviewComponent implements OnInit {
     )
 
     this._connection.observedBuzzInStatus.subscribe(
-      (currentStatus)=> {if(currentStatus) {this.buzzerMode = currentStatus}},
+      (currentStatus)=> {if(currentStatus != null) {this.buzzerMode = currentStatus; console.log("buzzermode in trebek view set to",currentStatus)}},
       (err)=>console.log(err)
     )
 
    }
 
   ngOnInit() {
+  }
+
+  choose(category) {
+     this.questions = category.questions
+  }
+
+  valueChosen(question,value) {
+    // if(question["doubleJeopardy"]) {
+    //   this._connection.doubleJeopardy(question)
+    // }
+    question["value"] = value
+    this._connection.displayQuestion(question)
+    this._connection.observedQuestionView.next(question)
+    this.questions = []
+    this._connection.observedBuzzInStatus.next(true)
   }
 
   trebekready() {
@@ -67,6 +90,7 @@ export class TrebekviewComponent implements OnInit {
   correct() {
     console.log('correct clicked')
     this._connection.playerCorrect()
+    this.buzzerMode = false
   }
 
   incorrect() {
@@ -75,5 +99,6 @@ export class TrebekviewComponent implements OnInit {
 
   giveUp() {
     this._connection.giveUp()
+    this.buzzerMode = false
   }
 }

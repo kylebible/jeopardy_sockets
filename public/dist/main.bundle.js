@@ -340,14 +340,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 var ConnectionService = (function () {
+    //todo on connect give new player game info
     function ConnectionService(_http, _cookie, _router) {
         var _this = this;
         this._http = _http;
         this._cookie = _cookie;
         this._router = _router;
         this.port = 8000;
-        // private url = 'http://localhost:' + this.port; 
-        this.url = 'https://jeopardysockets.herokuapp.com';
+        this.url = 'http://localhost:' + this.port;
         this.socketSubscription = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedData = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedGame = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
@@ -367,6 +367,10 @@ var ConnectionService = (function () {
         this.socket = __WEBPACK_IMPORTED_MODULE_2_socket_io_client__(this.url);
         this.socket.on('update_game', function (response) {
             this.observedGame.next(response);
+        }.bind(this));
+        this.socket.on('syncGame', function (game) {
+            this.observedGame.next(game.game);
+            this.observedPlayers.next(game.players);
         }.bind(this));
         this.socket.on('new_game', function (response) {
             for (var _i = 0, response_1 = response; _i < response_1.length; _i++) {
@@ -433,6 +437,7 @@ var ConnectionService = (function () {
             this.updateScores(this.observedPlayers.value);
             this.observedPlayersTurn.next(player.userName);
             this.observedBuzzedInPlayer.next("");
+            this.observedBuzzInStatus.next(false);
             this.buzzedinplayer = null;
             this.observedQuestionView.next(null);
             this.observedAnswerStatus.next(true);
@@ -442,7 +447,11 @@ var ConnectionService = (function () {
             this.observedEligiblePlayers.next(players);
         }.bind(this));
         this.socket.on('playerIncorrect', function (players) {
-            console.log("incorrect answer. Playser Left: ", players);
+            console.log("incorrect players", this.observedPlayers["value"]);
+            console.log("incorrect player", this.buzzedinplayer);
+            this.observedPlayers["value"][this.buzzedinplayer["id"]]["score"] -= this.question['value'];
+            // console.log(this.observedPlayers["value"][this.buzzedinplayer["id"]]["score"])
+            console.log("incorrect answer. Players Left: ", players);
             if (Object.keys(players).length < 1) {
                 console.log("no players left");
                 this.observedQuestionView.next(null);
@@ -556,7 +565,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "*{\n    font-family: Arial, Helvetica, sans-serif\n}\n\ntable.board {\n  border-collapse: separate;\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border-spacing: 2px;\n  border-color: gray;\n}\n  \ntr {\ndisplay: table-row;\nborder-color: inherit;\n}\n\nth, td {\n    padding: 10px;\n    background-color: blue;\n    border: 1px outset blue;\n    color: rgb(255, 194, 102);\n    padding: 1px;\n    vertical-align: middle;\n}\n\nth {\n    width: 100px;\n    font-size: medium;\n    text-align: center\n}\n\ntd {\n    font-size: 2.7em;\n    font-weight: bold;\n    vertical-align: middle;\n    height: 1%;\n    width: 100px;\n    border-radius: 10px\n}\n\ndiv a {\n    color: #FF6;\n    text-decoration: none;\n    outline: 0; \n}\n\n.scores {\n    font-family: Korinna;\n    color: white;\n    display: inline-block;\n    margin: 0 20px;\n}\n\n.question {\n    position: absolute;\n    top: 25%;\n    left: 0;\n    right: 0;\n    font-family: Korinna;\n    color: white;\n    font-size: 7vw;\n    vertical-align: middle;\n    text-align: center;\n    padding: 2vw;\n    text-shadow: 1px 3px 5px black;\n    font-weight: bold;\n}\n\n.buzzedin {\n    font-family: Korinna;\n    color: white;\n    font-size: 5vw;\n    text-align: center;\n    margin-top: 10%\n}", ""]);
+exports.push([module.i, "*{\n    font-family: Gameboard\n}\n\ntable.board {\n  border-collapse: separate;\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border-spacing: 2px;\n  border-color: black;\n  table-layout: fixed\n}\n  \ntr {\ndisplay: table-row;\nborder-color: inherit;\n}\n\n.overflow {\n    height: 100%\n}\n\nth, td {\n    background-color: blue;\n    border: 1px outset blue;\n    color: rgb(255, 194, 102);\n    vertical-align: middle;\n    text-shadow: 2px 4px 2px black;\n    empty-cells: show;\n}\n\nth {\n    width: 16.66667%;\n    font-size: 2vw;\n    color: white;\n    text-align: center\n}\n\ntd {\n    font-size: 5vmax;\n    font-weight: bold;\n    vertical-align: middle;\n    width: 16.66667%;\n}\n\ndiv a {\n    color: #FF6;\n    text-decoration: none;\n    outline: 0; \n}\n\n.scores {\n    font-family: Gameboard;\n    color: white;\n    text-shadow: 1px 3px 5px black;\n    display: inline-block;\n    margin: 0 20px;\n}\n\n.question {\n    position: fixed;\n    top: 50%;\n    left: 50%;\n    width: 100%;\n    font-family: Korinna;\n    color: white;\n    font-size: 7vw;\n    font-size: 11vh;\n    vertical-align: middle;\n    text-align: center;\n    padding: 2vw;\n    text-shadow: 1px 3px 5px black;\n    font-weight: bold;\n    -webkit-transform: translate(-50%, -50%);\n            transform: translate(-50%, -50%);\n}\n\n.buzzedin {\n    font-family: Korinna;\n    color: white;\n    font-size: 5vw;\n    text-align: center;\n    margin-top: 10%\n}\n\n.centered {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  /* bring your own prefixes */\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n}", ""]);
 
 // exports
 
@@ -569,7 +578,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/gameboard/gameboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf=\"!text_visible\" class=\"text-center\">\n    <h2 class=\"scores\" *ngFor=\"let key of playersArr\">{{players[key].userName}}: {{players[key].score}}</h2>\n</div>\n<table class=\"board\" *ngIf=\"!text_visible\">\n  <thead>\n      <tr>\n          <th *ngFor=\"let category of game\"><span>{{category.name | capitalize}}</span>&nbsp;</th>\n      </tr>\n    </thead>\n    <tbody>\n        <tr *ngFor=\"let i of arr\">\n            <td *ngFor=\"let category of game\" (click)=\"show(category.questions[i])\"><span *ngIf=\"!category.questions[i].asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span></td>\n        </tr>\n    </tbody>\n</table>\n<div *ngIf=\"text_visible\" style=\"vertical-align: middle\" (click)=\"question_clicked()\">\n    <h2 *ngIf=\"buzzedInPlayer\" class=\"buzzedin\">{{buzzedInPlayer}} buzzed in!</h2>\n    <h1 class=\"question\">{{text | uppercase}}</h1>\n</div>\n"
+module.exports = "<div *ngIf=\"!text_visible\" class=\"text-center\">\n    <h2 class=\"scores\" *ngFor=\"let key of playersArr\">{{players[key].userName}}: {{players[key].score | currency:'USD':true:'1.0-0'}}</h2>\n</div>\n<div class=\"overflow\">\n<table class=\"board\" *ngIf=\"!text_visible\">\n  <thead>\n      <tr>\n          <th *ngFor=\"let category of game\"><span>{{category.name | uppercase}}</span>&nbsp;</th>\n      </tr>\n    </thead>\n    <tbody>\n        <tr *ngFor=\"let i of arr\">\n            <td *ngFor=\"let category of game\" (click)=\"show(category.questions[i])\"><span *ngIf=\"!category.questions[i].asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span></td>\n    </tbody>\n</table>\n</div>\n<div *ngIf=\"text_visible\" (click)=\"question_clicked()\">\n    <h2 *ngIf=\"buzzedInPlayer\" class=\"buzzedin\">{{buzzedInPlayer}} buzzed in!</h2>\n    <h1 class=\"question\">{{text | uppercase}}</h1>\n</div>\n"
 
 /***/ }),
 
@@ -694,7 +703,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "h1 {\n    font-family: Jeopardy;\n    color: white;\n    font-size: 10vw;\n}\n\n.question {\n    font-family: Korinna;\n    color: white;\n}\n\n.option {\n    font-size: 5vw;\n    text-decoration: none;\n}", ""]);
+exports.push([module.i, "h1 {\n    font-family: Jeopardy;\n    color: white;\n    font-size: 10vw;\n    margin-top: 10%;\n    text-shadow: 1px 3px 5px black;\n}\n\n.question {\n    font-family: Korinna;\n    color: white;\n    text-shadow: 1px 3px 5px black;\n}\n\n.option {\n    font-size: 5vw;\n    text-decoration: none;\n}\n\n.centered {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  /* bring your own prefixes */\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n}", ""]);
 
 // exports
 
@@ -707,7 +716,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/landing/landing.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container text-center\">\n  <h1>Jeoparty</h1>\n  <a href=\"javascript:void(0);\" class=\"question option\" (click)=\"getGame()\" *ngIf=\"!game\">Start a new game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" [routerLink]='[\"/username\"]' *ngIf=\"game && numberPlayers<=3\">Join a game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" [routerLink]='[\"/trebekview\"]'*ngIf=\"game && !trebekPresence\" (click)=\"trebekPresent()\" >Be Alex Trebek</a>\n</div>"
+module.exports = "<div class=\"container centered text-center\">\n  <h1>Jeoparty</h1>\n  <a href=\"javascript:void(0);\" class=\"question option\" (click)=\"getGame()\" *ngIf=\"!game\">Start a new game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" [routerLink]='[\"/username\"]' *ngIf=\"game && numberPlayers<=3\">Join game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" [routerLink]='[\"/trebekview\"]'*ngIf=\"game && !trebekPresence\" (click)=\"trebekPresent()\" >Be Alex Trebek</a>\n</div>"
 
 /***/ }),
 
@@ -784,7 +793,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, ".question {\n    font-family: Korinna;\n    color: white;\n}", ""]);
+exports.push([module.i, ".question {\n    font-family: Korinna;\n    color: white;\n}\n\nbutton {\n    font-family: Korinna;\n}\n\n.centered {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  /* bring your own prefixes */\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n}", ""]);
 
 // exports
 
@@ -797,7 +806,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/landing/username/username.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container question\">\n  <form (submit)=\"joinGame()\" onsubmit=\"return false\">\n    <div class=\"form-group\">\n      <label for=\"exampleInputEmail1\">Username</label>\n      <input name=\"username\" type=\"text\" class=\"form-control\" placeholder=\"Enter username\" [(ngModel)]=\"username\">\n    </div>\n    <button type=\"submit\" class=\"btn btn-primary\">Submit</button>\n  </form>\n</div>"
+module.exports = "<div class=\"container centered question\">\n  <form (submit)=\"joinGame()\" onsubmit=\"return false\">\n    <div class=\"form-group\">\n      <label for=\"exampleInputEmail1\">Username</label>\n      <input name=\"username\" type=\"text\" class=\"form-control\" placeholder=\"Enter username\" [(ngModel)]=\"username\">\n    </div>\n    <button type=\"submit\" class=\"btn btn-primary\">Submit</button>\n  </form>\n</div>"
 
 /***/ }),
 
@@ -859,7 +868,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, ".question {\n    font-family: Korinna;\n    color: white;\n}\n\n.buzzer {\n    height: 100%;\n    width: 100%;\n    font-size: 15vw;\n}\n\n#container {\n    height: 100%;\n    width: 100%;\n    background-color: red;\n}", ""]);
+exports.push([module.i, ".question {\n    font-family: Korinna;\n    color: white;\n    text-shadow: 1px 3px 5px black;\n}\n\n.centered {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  /* bring your own prefixes */\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n}\n\n.buzzer {\n    height: 100%;\n    width: 100%;\n    font-size: 15vw;\n}\n\n#container {\n    height: 100%;\n    width: 100%;\n    background-color: red;\n}", ""]);
 
 // exports
 
@@ -872,7 +881,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/phoneboard/phoneboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf=\"!buzzermode && player\">\n  <h1 class=\"question text-center\">Score: {{player.score}}</h1>\n</div>\n<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !buzzermode && buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <div *ngFor=\"let question of questions; let i = index\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question,(i+1)*100)\"><span *ngIf=\"!question.asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"buzzermode && canAnswer\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n<div *ngIf=\"!myTurn && ready && !buzzermode && canAnswer\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"!canAnswer && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">You've already buzzed in!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>\n\n  <!--<p>current score: {{player.score}}</p>\n  <p>current question: {{question | json}}\n  <p>buzzer mode: {{buzzermode}}</p>\n  <p>my turn: {{myTurn}}</p>\n  <p>ready: {{ready}} </p>\n  <p>buzzed in player: {{buzzedInPlayer}} </p>\n  <p>can answer?: {{canAnswer}} </p>-->\n"
+module.exports = "<div class=\"centered\">\n<div *ngIf=\"!buzzermode && player\">\n  <h1 class=\"question text-center\">Score: {{player.score}}</h1>\n</div>\n<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !buzzermode && buzzedInPlayer.length<1\">\n        <h1 class=\"question text-center\">Pick a Clue!</h1>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"!myTurn && ready && !buzzermode && canAnswer\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"!canAnswer && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">You've already buzzed in!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>\n</div>\n<div *ngIf=\"buzzermode && canAnswer\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n  <!--<p>current score: {{player.score}}</p>\n  <p>current question: {{question | json}}\n  <p>buzzer mode: {{buzzermode}}</p>\n  <p>my turn: {{myTurn}}</p>\n  <p>ready: {{ready}} </p>\n  <p>buzzed in player: {{buzzedInPlayer}} </p>\n  <p>can answer?: {{canAnswer}} </p>-->\n"
 
 /***/ }),
 
@@ -911,7 +920,9 @@ var PhoneboardComponent = (function () {
         _connection.observedGame.subscribe(function (updatedGame) { _this.game = updatedGame; }, function (err) { return console.log(err); });
         _connection.observedQuestionView.subscribe(function (currentQuestion) { return _this.question = currentQuestion; }, function (err) { return console.log(err); });
         _connection.observedBuzzInStatus.subscribe(function (currentBuzzerMode) { _this.buzzermode = currentBuzzerMode; console.log("buzzer mode in phone vies", _this.buzzermode); }, function (err) { return console.log(err); });
-        _connection.observedGameReady.subscribe(function (currentReadiness) { _this.ready = currentReadiness; }, function (err) { return console.log(err); });
+        _connection.observedGameReady.subscribe(function (currentReadiness) { if (currentReadiness != null) {
+            _this.ready = currentReadiness;
+        } }, function (err) { return console.log(err); });
         _connection.observedTurnStatus.subscribe(function (currentTurnStatus) { _this.myTurn = currentTurnStatus; }, function (err) { return console.log(err); });
         _connection.observedBuzzedInPlayer.subscribe(function (currentlyBuzzedIn) { if (currentlyBuzzedIn) {
             _this.buzzedInPlayer = currentlyBuzzedIn;
@@ -1026,7 +1037,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, ".question {\n    font-family: Korinna;\n    color: white;\n    font-size: 10vw;\n}", ""]);
+exports.push([module.i, ".question {\n    font-family: Korinna;\n    color: white;\n    font-size: 10vw;\n    text-shadow: 1px 3px 5px black;\n}", ""]);
 
 // exports
 
@@ -1039,7 +1050,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/trebekview/trebekview.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<h1 class=\"question text-center\">Trebek View</h1>\n<h1 class=\"question text-center\" (click)=\"resetServer()\">Reset Server</h1>\n<div class=\"container\" style=\"margin-top: 70%\" *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">{{numberPlayers}} players waiting</h1>\n  <h1 class=\"question text-center\" (click)=\"trebekready()\">Ready to start?</h1>\n</div>\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length<1\">\n  <br><h1 class=\"question text-center\" *ngIf=\"answer.length>1\">{{answer}}</h1><br><br>\n  <h1 class=\"question text-center\">{{playerTurn}}'s turn</h1>\n  <h1 class=\"question text-center\" (click)=\"giveUp()\" *ngIf=\"buzzerMode\">Give Up?</h1>\n</div>\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length>0\">\n  <br><h1 class=\"question text-center\">{{answer}}</h1><br><br>\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} buzzed In!</h1>\n  <h1 class=\"question text-center\" (click)=\"correct()\">Correct Answer?</h1>\n  <h1 class=\"question text-center\" (click)=\"incorrect()\">Incorrect Answer?</h1>\n</div>\n<!--<p class=\"question\"># players {{numberPlayers}}</p>\n<p class=\"question\">players {{players | json}}</p>-->\n"
+module.exports = "<h1 class=\"question text-center\">Trebek View</h1>\n<h1 class=\"question text-center\" (click)=\"resetServer()\">Reset Server</h1>\n<div class=\"container\" style=\"margin-top: 70%\" *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">{{numberPlayers}} players waiting</h1>\n  <h1 class=\"question text-center\" (click)=\"trebekready()\">Ready to start?</h1>\n</div>\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length<1\">\n  <!--buzzer mode{{buzzerMode}} bip {{buzzedInPlayer}} {{questions | json}}-->\n    <div *ngIf=\"game\">\n      <div *ngIf=\"!buzzerMode && buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <div *ngFor=\"let question of questions; let i = index\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question,(i+1)*100)\"><span *ngIf=\"!question.asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n  <br><h1 class=\"question text-center\" *ngIf=\"answer.length>1\">{{answer}}</h1><br><br>\n  <h1 class=\"question text-center\">{{playerTurn}}'s turn</h1>\n  <h1 class=\"question text-center\" (click)=\"giveUp()\" *ngIf=\"buzzerMode\">Give Up?</h1>\n  {{buzzerMode}}\n</div>\n\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length>0\">\n  <br><h1 class=\"question text-center\">{{answer}}</h1><br><br>\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} buzzed In!</h1>\n  <h1 class=\"question text-center\" (click)=\"correct()\">Correct Answer?</h1>\n  <h1 class=\"question text-center\" (click)=\"incorrect()\">Incorrect Answer?</h1>\n</div>\n<!--<p class=\"question\"># players {{numberPlayers}}</p>\n<p class=\"question\">players {{players | json}}</p>-->\n"
 
 /***/ }),
 
@@ -1068,12 +1079,15 @@ var TrebekviewComponent = (function () {
         var _this = this;
         this._connection = _connection;
         this.players = {};
+        this.game = [];
+        this.questions = [];
         this.numberPlayers = 0;
         this.ready = false;
         this.playerTurn = "";
         this.buzzedInPlayer = "";
         this.answer = "";
         this.buzzerMode = false;
+        _connection.observedGame.subscribe(function (updatedGame) { _this.game = updatedGame; }, function (err) { return console.log(err); });
         this._connection.observedPlayers.subscribe(function (currentPlayers) {
             _this.players = currentPlayers;
             if (_this.players) {
@@ -1094,11 +1108,25 @@ var TrebekviewComponent = (function () {
         else {
             _this.answer = "";
         } });
-        this._connection.observedBuzzInStatus.subscribe(function (currentStatus) { if (currentStatus) {
+        this._connection.observedBuzzInStatus.subscribe(function (currentStatus) { if (currentStatus != null) {
             _this.buzzerMode = currentStatus;
+            console.log("buzzermode in trebek view set to", currentStatus);
         } }, function (err) { return console.log(err); });
     }
     TrebekviewComponent.prototype.ngOnInit = function () {
+    };
+    TrebekviewComponent.prototype.choose = function (category) {
+        this.questions = category.questions;
+    };
+    TrebekviewComponent.prototype.valueChosen = function (question, value) {
+        // if(question["doubleJeopardy"]) {
+        //   this._connection.doubleJeopardy(question)
+        // }
+        question["value"] = value;
+        this._connection.displayQuestion(question);
+        this._connection.observedQuestionView.next(question);
+        this.questions = [];
+        this._connection.observedBuzzInStatus.next(true);
     };
     TrebekviewComponent.prototype.trebekready = function () {
         console.log('trebekready');
@@ -1110,12 +1138,14 @@ var TrebekviewComponent = (function () {
     TrebekviewComponent.prototype.correct = function () {
         console.log('correct clicked');
         this._connection.playerCorrect();
+        this.buzzerMode = false;
     };
     TrebekviewComponent.prototype.incorrect = function () {
         this._connection.playerIncorrect();
     };
     TrebekviewComponent.prototype.giveUp = function () {
         this._connection.giveUp();
+        this.buzzerMode = false;
     };
     return TrebekviewComponent;
 }());

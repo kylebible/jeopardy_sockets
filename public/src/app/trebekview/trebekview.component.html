@@ -5,10 +5,27 @@
   <h1 class="question text-center" (click)="trebekready()">Ready to start?</h1>
 </div>
 <div class="container" *ngIf="ready && buzzedInPlayer.length<1">
+  <!--buzzer mode{{buzzerMode}} bip {{buzzedInPlayer}} {{questions | json}}-->
+    <div *ngIf="game">
+      <div *ngIf="!buzzerMode && buzzedInPlayer.length<1">
+      <div *ngIf="questions.length<1"> 
+        <div *ngFor="let category of game">
+          <button type="buton" class="btn btn-primary col-12" (click)="choose(category)">{{category.name}}</button><br>
+        </div>
+      </div>
+      <div *ngIf="questions.length>0">
+        <div *ngFor="let question of questions; let i = index">
+          <button type="buton" class="btn btn-primary col-12" (click)="valueChosen(question,(i+1)*100)"><span *ngIf="!question.asked">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span><span *ngIf="question.asked">Question Asked!</span></button><br>
+        </div>
+      </div>
+      </div>
+    </div>
   <br><h1 class="question text-center" *ngIf="answer.length>1">{{answer}}</h1><br><br>
   <h1 class="question text-center">{{playerTurn}}'s turn</h1>
   <h1 class="question text-center" (click)="giveUp()" *ngIf="buzzerMode">Give Up?</h1>
+  {{buzzerMode}}
 </div>
+
 <div class="container" *ngIf="ready && buzzedInPlayer.length>0">
   <br><h1 class="question text-center">{{answer}}</h1><br><br>
   <h1 class="question text-center">{{buzzedInPlayer}} buzzed In!</h1>
