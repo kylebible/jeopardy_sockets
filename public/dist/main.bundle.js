@@ -43,7 +43,8 @@ var routes = [
     { path: 'gameboard', component: __WEBPACK_IMPORTED_MODULE_2_app_gameboard_gameboard_component__["a" /* GameboardComponent */] },
     { path: 'username', component: __WEBPACK_IMPORTED_MODULE_4_app_landing_username_username_component__["a" /* UsernameComponent */] },
     { path: 'phoneboard', component: __WEBPACK_IMPORTED_MODULE_5_app_phoneboard_phoneboard_component__["a" /* PhoneboardComponent */] },
-    { path: 'trebekview', component: __WEBPACK_IMPORTED_MODULE_6_app_trebekview_trebekview_component__["a" /* TrebekviewComponent */] }
+    { path: 'trebekview', component: __WEBPACK_IMPORTED_MODULE_6_app_trebekview_trebekview_component__["a" /* TrebekviewComponent */] },
+    { path: '**', redirectTo: '' }
 ];
 var AppRoutingModule = (function () {
     function AppRoutingModule() {

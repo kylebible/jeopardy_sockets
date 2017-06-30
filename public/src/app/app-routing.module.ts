@@ -12,7 +12,8 @@ const routes: Routes = [
   {path: 'gameboard', component: GameboardComponent},
   {path: 'username', component: UsernameComponent},
   {path: 'phoneboard', component: PhoneboardComponent},
-  {path: 'trebekview', component: TrebekviewComponent}
+  {path: 'trebekview', component: TrebekviewComponent},
+  {path: '**', redirectTo: ''}
 ];
 
 @NgModule({
