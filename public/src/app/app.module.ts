@@ -16,6 +16,7 @@ import { UsernameComponent } from './landing/username/username.component';
 import { PhoneboardComponent } from './phoneboard/phoneboard.component';
 import { ValuechoicesComponent } from './valuechoices/valuechoices.component';
 import { TrebekviewComponent } from './trebekview/trebekview.component';
+import { CustomFormsModule } from 'ng2-validation';
 
 @NgModule({
   declarations: [
@@ -34,7 +35,8 @@ import { TrebekviewComponent } from './trebekview/trebekview.component';
     BrowserModule,
     HttpModule,
     FormsModule,
-    AppRoutingModule
+    AppRoutingModule,
+    CustomFormsModule
   ],
   providers: [ConnectionService,CookieService],
   bootstrap: [AppComponent]

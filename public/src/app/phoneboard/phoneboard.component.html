@@ -4,7 +4,7 @@
 </div>
 <div *ngIf="ready">
     <div *ngIf="game">
-      <div *ngIf="myTurn && !buzzermode && buzzedInPlayer.length<1">
+      <div *ngIf="myTurn && !myDJMode && !buzzermode && buzzedInPlayer.length<1">
         <h1 class="question text-center">Pick a Clue!</h1>
       </div>
     </div>
@@ -21,13 +21,34 @@
 <div *ngIf="!canAnswer && buzzedInPlayer.length<1">
   <h1 class="question text-center">You've already buzzed in!</h1>
 </div>
-<div *ngIf="buzzedInPlayer.length>0">
+<div *ngIf="buzzedInPlayer.length>0 && !DJMode && !myDJMode">
   <h1 class="question text-center">{{buzzedInPlayer}} Buzzed In!</h1>
 </div>
+<div *ngIf="myDJMode && !buzzermode && buzzedInPlayer.length<1">
+  <h1 class="question text-center">DOUBLE JEOPARDY!</h1>
+  <form #wagerForm="ngForm"(submit)="submitDJWager()" onsubmit="return false">
+    <div class="form-group">
+      <label class="question text-center">ENTER A WAGER FROM 100 TO {{maxWager}}</label>
+      <input name="wagerinput" type="number" placeholder="Enter your wager here!" min="100" [max]="maxWager" required class="form-control" [(ngModel)]="wager" #wagerinput="ngModel">
+      <div class="question" *ngIf='wagerinput.errors && (wagerinput.touched || wagerForm.submitted)'>
+        <p class="question" *ngIf='wagerinput.errors?.min || wagerinput.errors?.max'>WAGER MUST BE BETWEEN 100 & {{maxWager}}</p>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="!wagerForm.valid">Submit</button>
+  </form>
 </div>
-<div *ngIf="buzzermode && canAnswer" id="container" class="row">
-  <button type="button" class="buzzer btn btn-primary" (click)="buzzin()">Buzz In!</button>
 </div>
+<div *ngIf="buzzermode && !DJMode && canAnswer" id="container" class="row">
+  <button type="button" class="buzzer btn btn-primary text-center" (click)="buzzin()">Buzz In!</button>
+</div>
+<!--<form #wagerForm="ngForm"(submit)="submitDJWager()" onsubmit="return false">
+    <div class="form-group">
+      <label class="question text-center">ENTER A WAGER FROM 100 TO {{maxWager}}</label>
+      <input name="wagerinput" type="number" placeholder="Enter your wager here!" min="100" [max]="maxWager" class="form-control" [(ngModel)]="wager" #wagerinput="ngModel">
+      <p class="question" *ngIf='wagerinput.errors.min && wagerinput.errors.max'>WAGER MUST BE BETWEEN 100 & {{maxWager}}</p>
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="!wagerForm.valid">Submit</button>
+  </form>-->
   <!--<p>current score: {{player.score}}</p>
   <p>current question: {{question | json}}
   <p>buzzer mode: {{buzzermode}}</p>

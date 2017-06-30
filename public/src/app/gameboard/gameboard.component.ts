@@ -17,6 +17,7 @@ export class GameboardComponent implements OnInit {
   buzzedInPlayer = ""
   players;
   playersArr = []
+  audio = new Audio();
 
   constructor(private _connection:ConnectionService, private  _cookie:CookieService) {
     _connection.observedGame.subscribe(
@@ -37,6 +38,14 @@ export class GameboardComponent implements OnInit {
     _connection.observedPlayers.subscribe(
       (currentPlayers) => {if(currentPlayers) {this.players = currentPlayers; this.playersArr=Object.keys(this.players); console.log(this.players)}},
       (err) => console.log(err)
+    )
+
+    _connection.observedDJStatus.subscribe(
+      (status) => {if(status) {this.text = "DOUBLE JEOPARDY!!"; this.text_visible=true; this.playDoubleJeopardyAudio()}}
+    )
+
+    _connection.observedGiveUpSound.subscribe(
+      (status) => {if(status) {this.playGiveUp()}}
     )
 
    }
@@ -80,6 +89,18 @@ export class GameboardComponent implements OnInit {
         self.removeAnswer()
         self._connection.resetEligiblePlayers()
      },2000)
+   }
+
+   playDoubleJeopardyAudio() {
+    this.audio.src = "./../assets/jdaily2x.wav";
+    this.audio.load();
+    this.audio.play();
+   }
+
+   playGiveUp() {
+    this.audio.src = "./../assets/Times up.mp3";
+    this.audio.load();
+    this.audio.play();
    }
 
 

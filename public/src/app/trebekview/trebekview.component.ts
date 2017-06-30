@@ -16,6 +16,8 @@ export class TrebekviewComponent implements OnInit {
   buzzedInPlayer = ""
   answer= ""
   buzzerMode = false
+  DJMode = false
+  DJQuestion;
   //this.numberPlayers = Object.keys(this.players).length
 
   //TO DO: make ready? not appear when not enough players
@@ -58,6 +60,16 @@ export class TrebekviewComponent implements OnInit {
       (err)=>console.log(err)
     )
 
+    _connection.observedDJStatus.subscribe(
+      (status) => {if (status != null) {this.DJMode = status}},
+      (err)=>console.log(err)
+    )
+    
+    _connection.observedDJWager.subscribe(
+      (wager)=> {if (wager != null) {this.DJWagerReceived(wager)}},
+      (err)=> console.log(err)
+    )
+
    }
 
   ngOnInit() {
@@ -68,14 +80,27 @@ export class TrebekviewComponent implements OnInit {
   }
 
   valueChosen(question,value) {
-    // if(question["doubleJeopardy"]) {
-    //   this._connection.doubleJeopardy(question)
-    // }
-    question["value"] = value
-    this._connection.displayQuestion(question)
-    this._connection.observedQuestionView.next(question)
-    this.questions = []
-    this._connection.observedBuzzInStatus.next(true)
+    console.log(question)
+    if(question["doubleJeopardy"]) {
+      console.log("doubleJeopardy found")
+      this._connection.doubleJeopardy(question)
+      this.questions = []
+      this.DJQuestion = question
+    }
+    else {
+      question["value"] = value
+      this._connection.displayQuestion(question)
+      this._connection.observedQuestionView.next(question)
+      this.questions = []
+      this._connection.observedBuzzInStatus.next(true)
+    }
+   
+  }
+
+  DJWagerReceived(wager) {
+    this.DJQuestion["value"] = wager
+    this._connection.displayQuestion(this.DJQuestion);
+    this._connection.observedQuestionView.next(this.DJQuestion)
   }
 
   trebekready() {
@@ -100,5 +125,8 @@ export class TrebekviewComponent implements OnInit {
   giveUp() {
     this._connection.giveUp()
     this.buzzerMode = false
+  }
+  goback() {
+    this.questions = []
   }
 }

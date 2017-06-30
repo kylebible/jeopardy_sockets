@@ -156,6 +156,8 @@ var _a;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__phoneboard_phoneboard_component__ = __webpack_require__("../../../../../src/app/phoneboard/phoneboard.component.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__valuechoices_valuechoices_component__ = __webpack_require__("../../../../../src/app/valuechoices/valuechoices.component.ts");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__trebekview_trebekview_component__ = __webpack_require__("../../../../../src/app/trebekview/trebekview.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17_ng2_validation__ = __webpack_require__("../../../../ng2-validation/dist/index.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17_ng2_validation___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_17_ng2_validation__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppModule; });
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
@@ -163,6 +165,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+
 
 
 
@@ -202,8 +205,9 @@ AppModule = __decorate([
         imports: [
             __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */],
             __WEBPACK_IMPORTED_MODULE_3__angular_http__["a" /* HttpModule */],
-            __WEBPACK_IMPORTED_MODULE_2__angular_forms__["a" /* FormsModule */],
-            __WEBPACK_IMPORTED_MODULE_5_app_app_routing_module__["a" /* AppRoutingModule */]
+            __WEBPACK_IMPORTED_MODULE_2__angular_forms__["FormsModule"],
+            __WEBPACK_IMPORTED_MODULE_5_app_app_routing_module__["a" /* AppRoutingModule */],
+            __WEBPACK_IMPORTED_MODULE_17_ng2_validation__["CustomFormsModule"]
         ],
         providers: [__WEBPACK_IMPORTED_MODULE_6_app_connection_service__["a" /* ConnectionService */], __WEBPACK_IMPORTED_MODULE_11_angular2_cookie_services_cookies_service__["CookieService"]],
         bootstrap: [__WEBPACK_IMPORTED_MODULE_4__app_component__["a" /* AppComponent */]]
@@ -347,7 +351,8 @@ var ConnectionService = (function () {
         this._cookie = _cookie;
         this._router = _router;
         this.port = 8000;
-        this.url = 'http://localhost:' + this.port;
+        // private url = 'http://localhost:' + this.port; 
+        this.url = 'https://jeopardysockets.herokuapp.com';
         this.socketSubscription = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedData = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedGame = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
@@ -363,6 +368,10 @@ var ConnectionService = (function () {
         this.observedAnswerStatus = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedCurrentPlayer = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedTrebekPresence = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
+        this.observedDJStatus = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
+        this.observedDJQuestion = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
+        this.observedDJWager = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
+        this.observedGiveUpSound = new __WEBPACK_IMPORTED_MODULE_1_rxjs__["BehaviorSubject"](null);
         this.observedQuestionView.subscribe(function (currentQuestion) { _this.question = currentQuestion; }, function (err) { return console.log(err); });
         this.socket = __WEBPACK_IMPORTED_MODULE_2_socket_io_client__(this.url);
         this.socket.on('update_game', function (response) {
@@ -377,7 +386,7 @@ var ConnectionService = (function () {
                 var i = response_1[_i];
                 for (var _a = 0, _b = i["questions"]; _a < _b.length; _a++) {
                     var j = _b[_a];
-                    console.log(i["name"], j["value"]);
+                    console.log(i["name"], j["value"], j["doubleJeopardy"]);
                 }
             }
             console.log('new game', response);
@@ -441,6 +450,7 @@ var ConnectionService = (function () {
             this.buzzedinplayer = null;
             this.observedQuestionView.next(null);
             this.observedAnswerStatus.next(true);
+            this.observedDJStatus.next(false);
         }.bind(this));
         this.socket.on('eligiblePlayers', function (players) {
             console.log("players", players);
@@ -457,6 +467,7 @@ var ConnectionService = (function () {
                 this.observedQuestionView.next(null);
                 this.observedAnswerStatus.next(true);
                 this.observedBuzzInStatus.next(false);
+                this.observedDJStatus.next(false);
             }
             else if (this.socket.id in players) {
                 this.observedBuzzInStatus.next(true);
@@ -480,6 +491,14 @@ var ConnectionService = (function () {
             this.observedQuestionView.next(null);
             this.observedAnswerStatus.next(true);
             this.observedBuzzInStatus.next(false);
+            this.observedGiveUpSound.next(true);
+        }.bind(this));
+        this.socket.on('doubleJeopardy', function (question) {
+            this.observedDJStatus.next(true);
+            this.observedDJQuestion.next(question);
+        }.bind(this));
+        this.socket.on('DJWager', function (wager) {
+            this.observedDJWager.next(wager);
         }.bind(this));
         this.socket.on('resetServer', function () {
             console.log("in socket");
@@ -541,6 +560,12 @@ var ConnectionService = (function () {
     ConnectionService.prototype.trebekPresent = function () {
         this.socket.emit('trebekPresent');
     };
+    ConnectionService.prototype.doubleJeopardy = function (question) {
+        this.socket.emit('doubleJeopardy', question);
+    };
+    ConnectionService.prototype.submitDJWager = function (wager) {
+        this.socket.emit('DJWager', wager);
+    };
     ConnectionService.prototype.giveUp = function () {
         this.socket.emit('giveUp');
         this.socket.emit('resetEligiblePlayers');
@@ -565,7 +590,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "*{\n    font-family: Gameboard\n}\n\ntable.board {\n  border-collapse: separate;\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border-spacing: 2px;\n  border-color: black;\n  table-layout: fixed\n}\n  \ntr {\ndisplay: table-row;\nborder-color: inherit;\n}\n\n.overflow {\n    height: 100%\n}\n\nth, td {\n    background-color: blue;\n    border: 1px outset blue;\n    color: rgb(255, 194, 102);\n    vertical-align: middle;\n    text-shadow: 2px 4px 2px black;\n    empty-cells: show;\n}\n\nth {\n    width: 16.66667%;\n    font-size: 2vw;\n    color: white;\n    text-align: center\n}\n\ntd {\n    font-size: 5vmax;\n    font-weight: bold;\n    vertical-align: middle;\n    width: 16.66667%;\n}\n\ndiv a {\n    color: #FF6;\n    text-decoration: none;\n    outline: 0; \n}\n\n.scores {\n    font-family: Gameboard;\n    color: white;\n    text-shadow: 1px 3px 5px black;\n    display: inline-block;\n    margin: 0 20px;\n}\n\n.question {\n    position: fixed;\n    top: 50%;\n    left: 50%;\n    width: 100%;\n    font-family: Korinna;\n    color: white;\n    font-size: 7vw;\n    font-size: 11vh;\n    vertical-align: middle;\n    text-align: center;\n    padding: 2vw;\n    text-shadow: 1px 3px 5px black;\n    font-weight: bold;\n    -webkit-transform: translate(-50%, -50%);\n            transform: translate(-50%, -50%);\n}\n\n.buzzedin {\n    font-family: Korinna;\n    color: white;\n    font-size: 5vw;\n    text-align: center;\n    margin-top: 10%\n}\n\n.centered {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  /* bring your own prefixes */\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n}", ""]);
+exports.push([module.i, "*{\n    font-family: Gameboard\n}\n\ntable.board {\n  border-collapse: separate;\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border-spacing: 2px;\n  border-color: black;\n  table-layout: fixed\n}\n  \ntr {\ndisplay: table-row;\nborder-color: inherit;\n}\n\n.overflow {\n    height: 100%\n}\n\nth, td {\n    background-color: blue;\n    border: 1px outset blue;\n    color: rgb(255, 194, 102);\n    vertical-align: middle;\n    text-shadow: 2px 4px 2px black;\n    empty-cells: show;\n}\n\nth {\n    width: 16.66667%;\n    font-size: 2vw;\n    color: white;\n    text-align: center\n}\n\ntd {\n    font-size: 5vmax;\n    font-weight: bold;\n    vertical-align: middle;\n    width: 16.66667%;\n}\n\ndiv a {\n    color: #FF6;\n    text-decoration: none;\n    outline: 0; \n}\n\n.scores {\n    font-family: Gameboard;\n    color: white;\n    text-shadow: 1px 3px 5px black;\n    display: inline-block;\n    margin: 0 20px;\n}\n\n.question {\n    position: fixed;\n    top: 50%;\n    left: 50%;\n    width: 100%;\n    font-family: Korinna;\n    color: white;\n    font-size: 7vw;\n    font-size: 9vh;\n    vertical-align: middle;\n    text-align: center;\n    padding: 2vw;\n    text-shadow: 1px 3px 5px black;\n    font-weight: bold;\n    -webkit-transform: translate(-50%, -50%);\n            transform: translate(-50%, -50%);\n}\n\n.buzzedin {\n    font-family: Korinna;\n    color: white;\n    font-size: 5vw;\n    text-align: center;\n    margin-top: 10%\n}\n\n.centered {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  /* bring your own prefixes */\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n}", ""]);
 
 // exports
 
@@ -578,7 +603,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/gameboard/gameboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div *ngIf=\"!text_visible\" class=\"text-center\">\n    <h2 class=\"scores\" *ngFor=\"let key of playersArr\">{{players[key].userName}}: {{players[key].score | currency:'USD':true:'1.0-0'}}</h2>\n</div>\n<div class=\"overflow\">\n<table class=\"board\" *ngIf=\"!text_visible\">\n  <thead>\n      <tr>\n          <th *ngFor=\"let category of game\"><span>{{category.name | uppercase}}</span>&nbsp;</th>\n      </tr>\n    </thead>\n    <tbody>\n        <tr *ngFor=\"let i of arr\">\n            <td *ngFor=\"let category of game\" (click)=\"show(category.questions[i])\"><span *ngIf=\"!category.questions[i].asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span></td>\n    </tbody>\n</table>\n</div>\n<div *ngIf=\"text_visible\" (click)=\"question_clicked()\">\n    <h2 *ngIf=\"buzzedInPlayer\" class=\"buzzedin\">{{buzzedInPlayer}} buzzed in!</h2>\n    <h1 class=\"question\">{{text | uppercase}}</h1>\n</div>\n"
+module.exports = "<div *ngIf=\"!text_visible\" class=\"text-center\">\n    <h2 class=\"scores\" *ngFor=\"let key of playersArr\">{{players[key].userName}}: {{players[key].score | currency:'USD':true:'1.0-0'}}</h2>\n</div>\n<div class=\"overflow\">\n<table class=\"board\" *ngIf=\"!text_visible\">\n  <thead>\n      <tr>\n          <th *ngFor=\"let category of game\"><span>{{category.name | uppercase}}</span>&nbsp;</th>\n      </tr>\n    </thead>\n    <tbody>\n        <tr *ngFor=\"let i of arr\">\n            <td *ngFor=\"let category of game\" (click)=\"show(category.questions[i])\"><span *ngIf=\"!category.questions[i].asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span></td>\n    </tbody>\n</table>\n</div>\n<div *ngIf=\"text_visible\" (click)=\"question_clicked()\">\n    <h2 *ngIf=\"buzzedInPlayer\" class=\"buzzedin\">{{buzzedInPlayer}} buzzed in!</h2>\n    <h1 class=\"question\" [innerHTML]=\"text | uppercase\"></h1>\n</div>\n"
 
 /***/ }),
 
@@ -615,6 +640,7 @@ var GameboardComponent = (function () {
         this.arr = [0, 1, 2, 3, 4];
         this.buzzedInPlayer = "";
         this.playersArr = [];
+        this.audio = new Audio();
         _connection.observedGame.subscribe(function (updatedGame) { return _this.game = updatedGame; }, function (err) { return console.log(err); });
         _connection.observedQuestionView.subscribe(function (currentQuestion) {
             console.log("changing question");
@@ -636,6 +662,14 @@ var GameboardComponent = (function () {
             _this.playersArr = Object.keys(_this.players);
             console.log(_this.players);
         } }, function (err) { return console.log(err); });
+        _connection.observedDJStatus.subscribe(function (status) { if (status) {
+            _this.text = "DOUBLE JEOPARDY!!";
+            _this.text_visible = true;
+            _this.playDoubleJeopardyAudio();
+        } });
+        _connection.observedGiveUpSound.subscribe(function (status) { if (status) {
+            _this.playGiveUp();
+        } });
     }
     GameboardComponent.prototype.show = function (question) {
         for (var _i = 0, _a = this.game; _i < _a.length; _i++) {
@@ -677,6 +711,16 @@ var GameboardComponent = (function () {
             self._connection.resetEligiblePlayers();
         }, 2000);
     };
+    GameboardComponent.prototype.playDoubleJeopardyAudio = function () {
+        this.audio.src = "./../assets/jdaily2x.wav";
+        this.audio.load();
+        this.audio.play();
+    };
+    GameboardComponent.prototype.playGiveUp = function () {
+        this.audio.src = "./../assets/Times up.mp3";
+        this.audio.load();
+        this.audio.play();
+    };
     GameboardComponent.prototype.ngOnInit = function () {
     };
     return GameboardComponent;
@@ -703,7 +747,7 @@ exports = module.exports = __webpack_require__("../../../../css-loader/lib/css-b
 
 
 // module
-exports.push([module.i, "h1 {\n    font-family: Jeopardy;\n    color: white;\n    font-size: 10vw;\n    margin-top: 10%;\n    text-shadow: 1px 3px 5px black;\n}\n\n.question {\n    font-family: Korinna;\n    color: white;\n    text-shadow: 1px 3px 5px black;\n}\n\n.option {\n    font-size: 5vw;\n    text-decoration: none;\n}\n\n.centered {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  /* bring your own prefixes */\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n}", ""]);
+exports.push([module.i, "h1 {\n    font-family: Jeopardy;\n    color: white;\n    font-size: 10vw;\n    margin-top: 10%;\n    text-shadow: 1px 3px 5px black;\n}\n\n@media screen and (max-width: 600px) {\n  #start-game {\n    visibility: hidden;\n    clear: both;\n    float: left;\n    margin: 10px auto 5px 20px;\n    width: 28%;\n    display: none;\n  }\n}\n\n.question {\n    font-family: Korinna;\n    color: white;\n    text-shadow: 1px 3px 5px black;\n}\n\n.option {\n    font-size: 5vw;\n    text-decoration: none;\n}\n\n.centered {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  /* bring your own prefixes */\n  -webkit-transform: translate(-50%, -50%);\n          transform: translate(-50%, -50%);\n}", ""]);
 
 // exports
 
@@ -716,7 +760,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/landing/landing.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container centered text-center\">\n  <h1>Jeoparty</h1>\n  <a href=\"javascript:void(0);\" class=\"question option\" (click)=\"getGame()\" *ngIf=\"!game\">Start a new game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" [routerLink]='[\"/username\"]' *ngIf=\"game && numberPlayers<=3\">Join game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" [routerLink]='[\"/trebekview\"]'*ngIf=\"game && !trebekPresence\" (click)=\"trebekPresent()\" >Be Alex Trebek</a>\n</div>"
+module.exports = "<div class=\"container centered text-center\">\n  <h1>Jeoparty</h1>\n  <a href=\"javascript:void(0);\" class=\"question option\" id=\"start-game\" (click)=\"getGame()\" *ngIf=\"!game\">Start a new game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" [routerLink]='[\"/username\"]' *ngIf=\"game && numberPlayers<=3\">Join game</a><br>\n  <a href=\"javascript:void(0);\" class=\"question option\" [routerLink]='[\"/trebekview\"]'*ngIf=\"game && !trebekPresence\" (click)=\"trebekPresent()\" >Be Alex Trebek</a>\n</div>"
 
 /***/ }),
 
@@ -748,6 +792,7 @@ var LandingComponent = (function () {
         this.game = [];
         this.numberPlayers = 0;
         this.trebekPresence = false;
+        this.audio = new Audio();
         _connection.observedGame.subscribe(function (currentGame) { return _this.game = currentGame; }, function (err) { return console.log(err); });
         _connection.observedPlayers.subscribe(function (currentPlayers) {
             _this.players = currentPlayers;
@@ -762,6 +807,9 @@ var LandingComponent = (function () {
     LandingComponent.prototype.ngOnInit = function () {
     };
     LandingComponent.prototype.getGame = function () {
+        this.audio.src = "./../assets/Jeopardy Board SMS.mp3";
+        this.audio.load();
+        this.audio.play();
         console.log("get game");
         this._connection.startNewGame();
         this._router.navigate(['/gameboard']);
@@ -881,7 +929,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/phoneboard/phoneboard.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"centered\">\n<div *ngIf=\"!buzzermode && player\">\n  <h1 class=\"question text-center\">Score: {{player.score}}</h1>\n</div>\n<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !buzzermode && buzzedInPlayer.length<1\">\n        <h1 class=\"question text-center\">Pick a Clue!</h1>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"!myTurn && ready && !buzzermode && canAnswer\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"!canAnswer && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">You've already buzzed in!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>\n</div>\n<div *ngIf=\"buzzermode && canAnswer\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n  <!--<p>current score: {{player.score}}</p>\n  <p>current question: {{question | json}}\n  <p>buzzer mode: {{buzzermode}}</p>\n  <p>my turn: {{myTurn}}</p>\n  <p>ready: {{ready}} </p>\n  <p>buzzed in player: {{buzzedInPlayer}} </p>\n  <p>can answer?: {{canAnswer}} </p>-->\n"
+module.exports = "<div class=\"centered\">\n<div *ngIf=\"!buzzermode && player\">\n  <h1 class=\"question text-center\">Score: {{player.score}}</h1>\n</div>\n<div *ngIf=\"ready\">\n    <div *ngIf=\"game\">\n      <div *ngIf=\"myTurn && !myDJMode && !buzzermode && buzzedInPlayer.length<1\">\n        <h1 class=\"question text-center\">Pick a Clue!</h1>\n      </div>\n    </div>\n<div *ngIf=\"!game\">\n  <h1 class=\"question text-center\">Waiting for game to start</h1>\n</div>\n</div>\n<div *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">Waiting for other Players!</h1>\n</div>\n<div *ngIf=\"!myTurn && ready && !buzzermode && canAnswer\">\n  <h1 class=\"question text-center\">Not your turn!</h1>\n</div>\n<div *ngIf=\"!canAnswer && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">You've already buzzed in!</h1>\n</div>\n<div *ngIf=\"buzzedInPlayer.length>0 && !DJMode && !myDJMode\">\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} Buzzed In!</h1>\n</div>\n<div *ngIf=\"myDJMode && !buzzermode && buzzedInPlayer.length<1\">\n  <h1 class=\"question text-center\">DOUBLE JEOPARDY!</h1>\n  <form #wagerForm=\"ngForm\"(submit)=\"submitDJWager()\" onsubmit=\"return false\">\n    <div class=\"form-group\">\n      <label class=\"question text-center\">ENTER A WAGER FROM 100 TO {{maxWager}}</label>\n      <input name=\"wagerinput\" type=\"number\" placeholder=\"Enter your wager here!\" min=\"100\" [max]=\"maxWager\" required class=\"form-control\" [(ngModel)]=\"wager\" #wagerinput=\"ngModel\">\n      <div class=\"question\" *ngIf='wagerinput.errors && (wagerinput.touched || wagerForm.submitted)'>\n        <p class=\"question\" *ngIf='wagerinput.errors?.min || wagerinput.errors?.max'>WAGER MUST BE BETWEEN 100 & {{maxWager}}</p>\n      </div>\n    </div>\n    <button type=\"submit\" class=\"btn btn-primary\" [disabled]=\"!wagerForm.valid\">Submit</button>\n  </form>\n</div>\n</div>\n<div *ngIf=\"buzzermode && !DJMode && canAnswer\" id=\"container\" class=\"row\">\n  <button type=\"button\" class=\"buzzer btn btn-primary text-center\" (click)=\"buzzin()\">Buzz In!</button>\n</div>\n<!--<form #wagerForm=\"ngForm\"(submit)=\"submitDJWager()\" onsubmit=\"return false\">\n    <div class=\"form-group\">\n      <label class=\"question text-center\">ENTER A WAGER FROM 100 TO {{maxWager}}</label>\n      <input name=\"wagerinput\" type=\"number\" placeholder=\"Enter your wager here!\" min=\"100\" [max]=\"maxWager\" class=\"form-control\" [(ngModel)]=\"wager\" #wagerinput=\"ngModel\">\n      <p class=\"question\" *ngIf='wagerinput.errors.min && wagerinput.errors.max'>WAGER MUST BE BETWEEN 100 & {{maxWager}}</p>\n    </div>\n    <button type=\"submit\" class=\"btn btn-primary\" [disabled]=\"!wagerForm.valid\">Submit</button>\n  </form>-->\n  <!--<p>current score: {{player.score}}</p>\n  <p>current question: {{question | json}}\n  <p>buzzer mode: {{buzzermode}}</p>\n  <p>my turn: {{myTurn}}</p>\n  <p>ready: {{ready}} </p>\n  <p>buzzed in player: {{buzzedInPlayer}} </p>\n  <p>can answer?: {{canAnswer}} </p>-->\n"
 
 /***/ }),
 
@@ -917,9 +965,14 @@ var PhoneboardComponent = (function () {
         this.ready = false;
         this.buzzedInPlayer = "";
         this.canAnswer = true;
+        this.DJMode = false;
+        this.myDJMode = false;
+        this.maxWager = 500;
         _connection.observedGame.subscribe(function (updatedGame) { _this.game = updatedGame; }, function (err) { return console.log(err); });
         _connection.observedQuestionView.subscribe(function (currentQuestion) { return _this.question = currentQuestion; }, function (err) { return console.log(err); });
-        _connection.observedBuzzInStatus.subscribe(function (currentBuzzerMode) { _this.buzzermode = currentBuzzerMode; console.log("buzzer mode in phone vies", _this.buzzermode); }, function (err) { return console.log(err); });
+        _connection.observedBuzzInStatus.subscribe(function (currentBuzzerMode) { _this.buzzermode = currentBuzzerMode; if (_this.myDJMode && _this.buzzermode) {
+            _this.buzzin();
+        } }, function (err) { return console.log(err); });
         _connection.observedGameReady.subscribe(function (currentReadiness) { if (currentReadiness != null) {
             _this.ready = currentReadiness;
         } }, function (err) { return console.log(err); });
@@ -933,7 +986,21 @@ var PhoneboardComponent = (function () {
         _connection.observedAnswerStatus.subscribe(function (currentAnswerStatus) { if (currentAnswerStatus != null) {
             _this.canAnswer = currentAnswerStatus;
         } ; console.log("cananswer", _this.canAnswer); }, function (err) { return console.log(err); });
-        _connection.observedCurrentPlayer.subscribe(function (currentPlayer) { return _this.player = currentPlayer; }, function (err) { return console.log(err); });
+        _connection.observedCurrentPlayer.subscribe(function (currentPlayer) { if (currentPlayer) {
+            _this.player = currentPlayer;
+            if (_this.player.score < 500) {
+                _this.maxWager = 500;
+            }
+            else {
+                _this.maxWager = _this.player.score;
+            }
+        } }, function (err) { return console.log(err); });
+        _connection.observedDJStatus.subscribe(function (status) { if (status != null && _this.myTurn) {
+            _this.myDJMode = status;
+        }
+        else if (status != null) {
+            _this.DJMode = status;
+        } });
         //TO DO: resolve current answer status when question resets
     }
     PhoneboardComponent.prototype.ngOnInit = function () {
@@ -941,12 +1008,9 @@ var PhoneboardComponent = (function () {
     PhoneboardComponent.prototype.choose = function (category) {
         this.questions = category.questions;
     };
-    PhoneboardComponent.prototype.valueChosen = function (question, value) {
-        question["value"] = value;
-        this._connection.displayQuestion(question);
-        this._connection.observedQuestionView.next(question);
-        this.questions = [];
-        this._connection.observedBuzzInStatus.next(true);
+    PhoneboardComponent.prototype.submitDJWager = function () {
+        this._connection.submitDJWager(this.wager);
+        this.wager = null;
     };
     PhoneboardComponent.prototype.buzzin = function () {
         this._connection.buzzIn();
@@ -1050,7 +1114,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/trebekview/trebekview.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<h1 class=\"question text-center\">Trebek View</h1>\n<h1 class=\"question text-center\" (click)=\"resetServer()\">Reset Server</h1>\n<div class=\"container\" style=\"margin-top: 70%\" *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">{{numberPlayers}} players waiting</h1>\n  <h1 class=\"question text-center\" (click)=\"trebekready()\">Ready to start?</h1>\n</div>\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length<1\">\n  <!--buzzer mode{{buzzerMode}} bip {{buzzedInPlayer}} {{questions | json}}-->\n    <div *ngIf=\"game\">\n      <div *ngIf=\"!buzzerMode && buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <div *ngFor=\"let question of questions; let i = index\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question,(i+1)*100)\"><span *ngIf=\"!question.asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n  <br><h1 class=\"question text-center\" *ngIf=\"answer.length>1\">{{answer}}</h1><br><br>\n  <h1 class=\"question text-center\">{{playerTurn}}'s turn</h1>\n  <h1 class=\"question text-center\" (click)=\"giveUp()\" *ngIf=\"buzzerMode\">Give Up?</h1>\n  {{buzzerMode}}\n</div>\n\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length>0\">\n  <br><h1 class=\"question text-center\">{{answer}}</h1><br><br>\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} buzzed In!</h1>\n  <h1 class=\"question text-center\" (click)=\"correct()\">Correct Answer?</h1>\n  <h1 class=\"question text-center\" (click)=\"incorrect()\">Incorrect Answer?</h1>\n</div>\n<!--<p class=\"question\"># players {{numberPlayers}}</p>\n<p class=\"question\">players {{players | json}}</p>-->\n"
+module.exports = "<h1 class=\"question text-center\">Trebek View</h1>\n<h1 class=\"question text-center\" (click)=\"resetServer()\">Reset Server</h1>\n<div class=\"container\" style=\"margin-top: 70%\" *ngIf=\"!ready\">\n  <h1 class=\"question text-center\">{{numberPlayers}} players waiting</h1>\n  <h1 class=\"question text-center\" *ngIf=\"numberPlayers>=2\" (click)=\"trebekready()\">Ready to start?</h1>\n</div>\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length<1\">\n  <!--buzzer mode{{buzzerMode}} bip {{buzzedInPlayer}} {{questions | json}}-->\n    <div *ngIf=\"game\">\n      <div *ngIf=\"!buzzerMode && !DJMode&& buzzedInPlayer.length<1\">\n      <div *ngIf=\"questions.length<1\"> \n        <div *ngFor=\"let category of game\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"choose(category)\">{{category.name | uppercase}}</button><br>\n        </div>\n      </div>\n      <div *ngIf=\"questions.length>0\">\n        <h3 class=\"question text-center\" (click)=\"goback()\">GO BACK?</h3>\n        <div *ngFor=\"let question of questions; let i = index\">\n          <button type=\"buton\" class=\"btn btn-primary col-12\" (click)=\"valueChosen(question,(i+1)*100)\" [disabled]=\"question.asked\"><span *ngIf=\"!question.asked\">{{(i+1)*100 | currency:'USD':true:'3.0-0'}}</span><span *ngIf=\"question.asked\">Question Asked!</span></button><br>\n        </div>\n      </div>\n      </div>\n    </div>\n  <br><h1 class=\"question text-center\" *ngIf=\"answer.length>1\">{{answer | uppercase}}</h1><br><br>\n  <h1 class=\"question text-center\">{{playerTurn | uppercase}}'s turn</h1>\n  <h1 class=\"question text-center\" *ngIf=\"DJMode\">DOUBLE JEOPARDY</h1>\n  <h1 class=\"question text-center\" (click)=\"giveUp()\" *ngIf=\"buzzerMode\">Give Up?</h1>\n</div>\n\n<div class=\"container\" *ngIf=\"ready && buzzedInPlayer.length>0\">\n  <br><h1 class=\"question text-center\">{{answer}}</h1><br><br>\n  <h1 class=\"question text-center\">{{buzzedInPlayer}} buzzed In!</h1>\n  <h1 class=\"question text-center\" (click)=\"correct()\">Correct Answer?</h1>\n  <h1 class=\"question text-center\" (click)=\"incorrect()\">Incorrect Answer?</h1>\n</div>\n<!--<p class=\"question\"># players {{numberPlayers}}</p>\n<p class=\"question\">players {{players | json}}</p>-->\n"
 
 /***/ }),
 
@@ -1087,6 +1151,7 @@ var TrebekviewComponent = (function () {
         this.buzzedInPlayer = "";
         this.answer = "";
         this.buzzerMode = false;
+        this.DJMode = false;
         _connection.observedGame.subscribe(function (updatedGame) { _this.game = updatedGame; }, function (err) { return console.log(err); });
         this._connection.observedPlayers.subscribe(function (currentPlayers) {
             _this.players = currentPlayers;
@@ -1112,6 +1177,12 @@ var TrebekviewComponent = (function () {
             _this.buzzerMode = currentStatus;
             console.log("buzzermode in trebek view set to", currentStatus);
         } }, function (err) { return console.log(err); });
+        _connection.observedDJStatus.subscribe(function (status) { if (status != null) {
+            _this.DJMode = status;
+        } }, function (err) { return console.log(err); });
+        _connection.observedDJWager.subscribe(function (wager) { if (wager != null) {
+            _this.DJWagerReceived(wager);
+        } }, function (err) { return console.log(err); });
     }
     TrebekviewComponent.prototype.ngOnInit = function () {
     };
@@ -1119,14 +1190,25 @@ var TrebekviewComponent = (function () {
         this.questions = category.questions;
     };
     TrebekviewComponent.prototype.valueChosen = function (question, value) {
-        // if(question["doubleJeopardy"]) {
-        //   this._connection.doubleJeopardy(question)
-        // }
-        question["value"] = value;
-        this._connection.displayQuestion(question);
-        this._connection.observedQuestionView.next(question);
-        this.questions = [];
-        this._connection.observedBuzzInStatus.next(true);
+        console.log(question);
+        if (question["doubleJeopardy"]) {
+            console.log("doubleJeopardy found");
+            this._connection.doubleJeopardy(question);
+            this.questions = [];
+            this.DJQuestion = question;
+        }
+        else {
+            question["value"] = value;
+            this._connection.displayQuestion(question);
+            this._connection.observedQuestionView.next(question);
+            this.questions = [];
+            this._connection.observedBuzzInStatus.next(true);
+        }
+    };
+    TrebekviewComponent.prototype.DJWagerReceived = function (wager) {
+        this.DJQuestion["value"] = wager;
+        this._connection.displayQuestion(this.DJQuestion);
+        this._connection.observedQuestionView.next(this.DJQuestion);
     };
     TrebekviewComponent.prototype.trebekready = function () {
         console.log('trebekready');
@@ -1146,6 +1228,9 @@ var TrebekviewComponent = (function () {
     TrebekviewComponent.prototype.giveUp = function () {
         this._connection.giveUp();
         this.buzzerMode = false;
+    };
+    TrebekviewComponent.prototype.goback = function () {
+        this.questions = [];
     };
     return TrebekviewComponent;
 }());

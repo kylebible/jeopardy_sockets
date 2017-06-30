@@ -11,8 +11,8 @@ declare var process:any
 @Injectable()
 export class ConnectionService implements OnDestroy {
   port = 8000
-  private url = 'http://localhost:' + this.port; 
-  // private url = 'https://jeopardysockets.herokuapp.com';
+  // private url = 'http://localhost:' + this.port; 
+  private url = 'https://jeopardysockets.herokuapp.com';
   socket;
   socketSubscription = new BehaviorSubject(null)
   observedData = new BehaviorSubject(null)
@@ -29,6 +29,10 @@ export class ConnectionService implements OnDestroy {
   observedAnswerStatus = new BehaviorSubject(null)
   observedCurrentPlayer = new BehaviorSubject(null)
   observedTrebekPresence = new BehaviorSubject(null)
+  observedDJStatus = new BehaviorSubject(null)
+  observedDJQuestion = new BehaviorSubject(null)
+  observedDJWager = new BehaviorSubject(null)
+  observedGiveUpSound = new BehaviorSubject(null)
   buzzedinplayer: object;
   question;
   
@@ -55,7 +59,7 @@ export class ConnectionService implements OnDestroy {
       this.socket.on('new_game', function(response) {
       for (var i of response) {
         for (var j of i["questions"]) {
-          console.log(i["name"],j["value"])
+          console.log(i["name"],j["value"],j["doubleJeopardy"])
         }
       }
       console.log('new game',response)
@@ -124,6 +128,7 @@ export class ConnectionService implements OnDestroy {
         this.buzzedinplayer = null
         this.observedQuestionView.next(null)
         this.observedAnswerStatus.next(true)
+        this.observedDJStatus.next(false)
       }.bind(this))
 
       this.socket.on('eligiblePlayers', function(players) {
@@ -142,6 +147,7 @@ export class ConnectionService implements OnDestroy {
           this.observedQuestionView.next(null)
           this.observedAnswerStatus.next(true)
           this.observedBuzzInStatus.next(false)
+          this.observedDJStatus.next(false)
         }
         else if(this.socket.id in players) {
           this.observedBuzzInStatus.next(true)
@@ -169,7 +175,17 @@ export class ConnectionService implements OnDestroy {
         this.observedQuestionView.next(null)
         this.observedAnswerStatus.next(true)
         this.observedBuzzInStatus.next(false)
+        this.observedGiveUpSound.next(true)
       }.bind(this))
+
+      this.socket.on('doubleJeopardy', function(question) {
+        this.observedDJStatus.next(true);
+        this.observedDJQuestion.next(question);
+      }.bind(this))
+
+      this.socket.on('DJWager', function(wager) {
+      this.observedDJWager.next(wager)
+    }.bind(this))
 
 
       this.socket.on('resetServer',function() {
@@ -253,9 +269,19 @@ export class ConnectionService implements OnDestroy {
     this.socket.emit('trebekPresent')
   }
 
+  doubleJeopardy(question) {
+    this.socket.emit('doubleJeopardy',question)
+  }
+
+  submitDJWager(wager) {
+    this.socket.emit('DJWager',wager)
+  }
+
   giveUp() {
     this.socket.emit('giveUp')
     this.socket.emit('resetEligiblePlayers')
   }
+
+
 
 }

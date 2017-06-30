@@ -171,6 +171,18 @@ io.sockets.on('connection', function (socket) {
       io.emit('updatePlayers',players)
     })
 
+    socket.on('doubleJeopardy', function(question) {
+      io.emit('doubleJeopardy',question)
+    })
+
+    socket.on('DJWager', function(wager) {
+      djplayer = JSON.parse(JSON.stringify(players[socket.id]))
+      eligiblePlayers = {}
+      eligiblePlayers[socket.id] = djplayer
+      io.emit('DJWager',wager)
+      io.emit('eligiblePlayers',eligiblePlayers)
+    })
+
 
 })
 
@@ -178,20 +190,9 @@ function categories(found_game) {
   var titleArr =[]
   var arr=[]
   var dict = {}
-  var doubleJeopardyQs = {}
-  while (Object.keys(doubleJeopardyQs).length < 2) {
-    var idx = Math.floor(Math.random()*60)
-    if (!doubleJeopardyQs[idx]) {
-      doubleJeopardyQs[idx] = true
-    }
-  }
   for (var [index, i] of found_game.entries()) {
     if (i.invalid>0) {
       i["asked"] = true
-    }
-    if (index in doubleJeopardyQs) {
-      i["doubleJeopardy"] = true
-      console.log(i)
     }
     if (!dict[i.category.title]) {
       titleArr.push(i.category.title)
@@ -209,10 +210,20 @@ function categories(found_game) {
   for (var j of titleArr) {
     arr.push({name: j,questions:dict[j]})
   }
-  // for (var k of arr) {
-  //   k.questions.sort(function(a,b) {
-  //     return a.value > b.value
-  //   })
-  // }
+  var doubleJeopardyQs = {}
+  var count = 0
+  while (Object.keys(doubleJeopardyQs).length < 2) {
+  var idx = Math.floor(Math.random()*30)
+    if (!doubleJeopardyQs[idx]) {
+      doubleJeopardyQs[idx] = true
+    }
+  }
+  for (var i of arr) {
+    for (var j of i["questions"]) {
+      if (doubleJeopardyQs[count]) {
+        j["doubleJeopardy"] = true
+      } count++
+    }
+  }
   return arr
 }

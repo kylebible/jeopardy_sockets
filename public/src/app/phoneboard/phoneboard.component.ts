@@ -15,8 +15,12 @@ export class PhoneboardComponent implements OnInit {
   ready = false;
   buzzedInPlayer = ""
   canAnswer = true;
+  DJMode = false;
+  myDJMode = false
   player;
+  maxWager = 500
   question;
+  wager;
 
   constructor(private _router:Router, private _connection:ConnectionService) {
     _connection.observedGame.subscribe(
@@ -28,7 +32,7 @@ export class PhoneboardComponent implements OnInit {
       (err) =>console.log(err)
     )
     _connection.observedBuzzInStatus.subscribe(
-      (currentBuzzerMode) => {this.buzzermode = currentBuzzerMode; console.log("buzzer mode in phone vies",this.buzzermode)},
+      (currentBuzzerMode) => {this.buzzermode = currentBuzzerMode; if(this.myDJMode && this.buzzermode) {this.buzzin()}},
       (err) => console.log(err)
     )
 
@@ -53,8 +57,12 @@ export class PhoneboardComponent implements OnInit {
     )
 
     _connection.observedCurrentPlayer.subscribe(
-      (currentPlayer) => this.player = currentPlayer,
+          (currentPlayer) => {if(currentPlayer) {this.player = currentPlayer; if(this.player.score < 500) {this.maxWager = 500} else {this.maxWager = this.player.score}}},
       (err)=>console.log(err)
+    )
+
+    _connection.observedDJStatus.subscribe(
+      (status) => {if (status != null && this.myTurn) {this.myDJMode = status} else if (status!= null) {this.DJMode = status} }
     )
 
     //TO DO: resolve current answer status when question resets
@@ -67,12 +75,10 @@ export class PhoneboardComponent implements OnInit {
      this.questions = category.questions
   }
 
-  valueChosen(question,value) {
-    question["value"] = value
-    this._connection.displayQuestion(question)
-    this._connection.observedQuestionView.next(question)
-    this.questions = []
-    this._connection.observedBuzzInStatus.next(true)
+
+  submitDJWager() {
+    this._connection.submitDJWager(this.wager)
+    this.wager = null
   }
 
   buzzin() {

@@ -6,6 +6,17 @@ h1 {
     text-shadow: 1px 3px 5px black;
 }
 
+@media screen and (max-width: 600px) {
+  #start-game {
+    visibility: hidden;
+    clear: both;
+    float: left;
+    margin: 10px auto 5px 20px;
+    width: 28%;
+    display: none;
+  }
+}
+
 .question {
     font-family: Korinna;
     color: white;

@@ -12,6 +12,8 @@ export class LandingComponent implements OnInit {
   players;
   numberPlayers = 0
   trebekPresence = false
+  audio = new Audio();
+  
 
   constructor(private _connection: ConnectionService, private _router:Router) {
     _connection.observedGame.subscribe(
@@ -39,6 +41,9 @@ export class LandingComponent implements OnInit {
   }
 
   getGame() {
+    this.audio.src = "./../assets/Jeopardy Board SMS.mp3";
+    this.audio.load();
+    this.audio.play();
     console.log("get game")
     this._connection.startNewGame()
     this._router.navigate(['/gameboard'])

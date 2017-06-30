@@ -16,5 +16,5 @@
 </div>
 <div *ngIf="text_visible" (click)="question_clicked()">
     <h2 *ngIf="buzzedInPlayer" class="buzzedin">{{buzzedInPlayer}} buzzed in!</h2>
-    <h1 class="question">{{text | uppercase}}</h1>
+    <h1 class="question" [innerHTML]="text | uppercase"></h1>
 </div>
