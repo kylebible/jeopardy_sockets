@@ -855,7 +855,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/landing/username/username.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<div class=\"container centered question\">\n  <form (submit)=\"joinGame()\" onsubmit=\"return false\">\n    <div class=\"form-group\">\n      <label for=\"exampleInputEmail1\">Username</label>\n      <input name=\"username\" type=\"text\" class=\"form-control\" placeholder=\"Enter username\" [(ngModel)]=\"username\">\n    </div>\n    <button type=\"submit\" class=\"btn btn-primary\">Submit</button>\n  </form>\n</div>"
+module.exports = "<div class=\"container centered question\">\n  <form #userform=\"ngForm\" (submit)=\"joinGame()\" onsubmit=\"return false\">\n    <div class=\"form-group\">\n      <label for=\"exampleInputEmail1\">Username</label>\n      <input name=\"user\" type=\"text\" class=\"form-control\" required minlength=\"2\" maxlength=\"10\" placeholder=\"Enter username\" [(ngModel)]=\"username\" #user=\"ngModel\">\n      <div class=\"question text-center\" *ngIf='user.errors && (user.touched || user.submitted)'>\n        <p class=\"question text-center\" *ngIf='user.errors?.minlength'>Username must be at least 2 characters long!</p>\n        <p class=\"question text-center\" *ngIf='user.errors?.maxlength'>Username can not be more than 10 characters long!</p>\n      </div>\n    </div>\n    <button [disabled]=\"!userform.valid\" type=\"submit\" class=\"btn btn-primary\">Submit</button>\n  </form>\n</div>"
 
 /***/ }),
 

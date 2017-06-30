@@ -1,9 +1,13 @@
 <div class="container centered question">
-  <form (submit)="joinGame()" onsubmit="return false">
+  <form #userform="ngForm" (submit)="joinGame()" onsubmit="return false">
     <div class="form-group">
       <label for="exampleInputEmail1">Username</label>
-      <input name="username" type="text" class="form-control" placeholder="Enter username" [(ngModel)]="username">
+      <input name="user" type="text" class="form-control" required minlength="2" maxlength="10" placeholder="Enter username" [(ngModel)]="username" #user="ngModel">
+      <div class="question text-center" *ngIf='user.errors && (user.touched || user.submitted)'>
+        <p class="question text-center" *ngIf='user.errors?.minlength'>Username must be at least 2 characters long!</p>
+        <p class="question text-center" *ngIf='user.errors?.maxlength'>Username can not be more than 10 characters long!</p>
+      </div>
     </div>
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button [disabled]="!userform.valid" type="submit" class="btn btn-primary">Submit</button>
   </form>
 </div>
